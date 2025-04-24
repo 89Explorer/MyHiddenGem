@@ -15,8 +15,10 @@ class HomeViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
         
-        setupHeaderView()
+        setupHeaderView(with: "투데이")
         setupHeaderButtons()
+        
+        NetworkManager.shared.getData() 
     }
     
     
@@ -27,9 +29,9 @@ class HomeViewController: UIViewController {
 extension HomeViewController {
     
     /// 홈 화면 상단 뷰 설정
-    func setupHeaderView() {
+    func setupHeaderView(with title: String) {
         let titleLabel: UILabel = UILabel()
-        titleLabel.text = "Must-Go?"
+        titleLabel.text = title
         titleLabel.font = UIFont.boldSystemFont(ofSize: 24)
         titleLabel.textColor = .label
         
