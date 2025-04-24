@@ -1,5 +1,5 @@
 //
-//  ViewController.swift
+//  NoteViewController.swift
 //  MyHiddenGem
 //
 //  Created by 권정근 on 4/23/25.
@@ -7,13 +7,13 @@
 
 import UIKit
 
-class ViewController: UIViewController {
+class NoteViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .systemBackground
-    }
 
+        // Do any additional setup after loading the view.
+    }
+    
 
 }
-
