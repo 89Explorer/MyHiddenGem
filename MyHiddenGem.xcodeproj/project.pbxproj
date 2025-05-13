@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		9DD5F7302DBA459000E9CBAC /* Config.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 9DD5F72F2DBA459000E9CBAC /* Config.xcconfig */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		9D4409A72DB832B000A2A21F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -27,6 +31,7 @@
 		9D44098D2DB832AE00A2A21F /* MyHiddenGem.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MyHiddenGem.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9D4409A62DB832B000A2A21F /* MyHiddenGemTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MyHiddenGemTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		9D4409B02DB832B000A2A21F /* MyHiddenGemUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MyHiddenGemUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		9DD5F72F2DBA459000E9CBAC /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -88,6 +93,7 @@
 		9D4409842DB832AE00A2A21F = {
 			isa = PBXGroup;
 			children = (
+				9DD5F72F2DBA459000E9CBAC /* Config.xcconfig */,
 				9D44098F2DB832AE00A2A21F /* MyHiddenGem */,
 				9D4409A92DB832B000A2A21F /* MyHiddenGemTests */,
 				9D4409B32DB832B000A2A21F /* MyHiddenGemUITests */,
@@ -225,6 +231,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9DD5F7302DBA459000E9CBAC /* Config.xcconfig in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -350,6 +357,7 @@
 		};
 		9D4409BC2DB832B000A2A21F /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9DD5F72F2DBA459000E9CBAC /* Config.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;

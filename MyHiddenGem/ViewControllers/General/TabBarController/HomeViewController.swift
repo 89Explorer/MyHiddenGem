@@ -6,9 +6,16 @@
 //
 
 import UIKit
+import Combine
 
 class HomeViewController: UIViewController {
-
+    
+    
+    // MARK: - Variable
+    private let categoriesViewModel: CategoryViewModel = CategoryViewModel()
+    
+    private var recommendationCollectionView: UICollectionView!
+    
     
     // MARK: - Life Cycle
     override func viewDidLoad() {
@@ -17,8 +24,33 @@ class HomeViewController: UIViewController {
         
         setupHeaderView(with: "투데이")
         setupHeaderButtons()
+        fetchCategories()
         
-        NetworkManager.shared.getData() 
+        
+        Task {
+            do {
+                let places = try await NetworkManager.shared.getEateryLists()
+                print("📍 불러온 장소 수: \(places.count)")
+                
+                for place in places {
+                    print("🗺️ \(place.title) - \(place.addr1)")
+                }
+            } catch {
+                print("❌ 오류 발생: \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    
+    // MARK: - Functions
+    private func fetchCategories() {
+        
+        Task {
+            await categoriesViewModel.fetchCategories()
+            print("📋 카테고리 목록:")
+            categoriesViewModel.categories.forEach { print("- \($0.name)") }
+            // 이후 collectionView.reloadData() 같은 뷰 업데이트 호출
+        }
     }
     
     

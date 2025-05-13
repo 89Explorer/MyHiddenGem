@@ -7,7 +7,7 @@
 
 import Foundation
 
-
+// ✅ 음식점 카테고리 데이터 모델 
 struct StoreCategory: Codable {
     let code: String
     let name: String
