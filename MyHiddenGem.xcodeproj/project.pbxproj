@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9D7E8B322DD4766000BEA0E8 /* SDWebImage in Frameworks */ = {isa = PBXBuildFile; productRef = 9D7E8B312DD4766000BEA0E8 /* SDWebImage */; };
 		9DD5F7302DBA459000E9CBAC /* Config.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 9DD5F72F2DBA459000E9CBAC /* Config.xcconfig */; };
 /* End PBXBuildFile section */
 
@@ -70,6 +71,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9D7E8B322DD4766000BEA0E8 /* SDWebImage in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -131,6 +133,7 @@
 			);
 			name = MyHiddenGem;
 			packageProductDependencies = (
+				9D7E8B312DD4766000BEA0E8 /* SDWebImage */,
 			);
 			productName = MyHiddenGem;
 			productReference = 9D44098D2DB832AE00A2A21F /* MyHiddenGem.app */;
@@ -214,6 +217,9 @@
 			);
 			mainGroup = 9D4409842DB832AE00A2A21F;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				9D7E8B302DD4766000BEA0E8 /* XCRemoteSwiftPackageReference "SDWebImage" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 9D44098E2DB832AE00A2A21F /* Products */;
 			projectDirPath = "";
@@ -589,6 +595,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		9D7E8B302DD4766000BEA0E8 /* XCRemoteSwiftPackageReference "SDWebImage" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SDWebImage/SDWebImage.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.21.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		9D7E8B312DD4766000BEA0E8 /* SDWebImage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9D7E8B302DD4766000BEA0E8 /* XCRemoteSwiftPackageReference "SDWebImage" */;
+			productName = SDWebImage;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 9D4409852DB832AE00A2A21F /* Project object */;
 }

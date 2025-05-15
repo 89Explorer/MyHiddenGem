@@ -31,27 +31,31 @@ struct EateryItems: Codable {
 
 // MARK: - EateryItem
 struct EateryItem: Codable {
-    let addr1, addr2, areacode: String
-    let cat1: Cat1
-    let cat2: Cat2
-    let cat3, contentid, contenttypeid, createdtime: String
-    let firstimage, firstimage2: String
-    let cpyrhtDivCD: CpyrhtDivCD
-    let mapx, mapy, mlevel, modifiedtime: String
-    let sigungucode, tel, title, zipcode: String
-    let lDongRegnCD, lDongSignguCD: String
-    let lclsSystm1: LclsSystm1
-    let lclsSystm2: LclsSystm2
-    let lclsSystm3: String
-
-    enum CodingKeys: String, CodingKey {
-        case addr1, addr2, areacode, cat1, cat2, cat3, contentid, contenttypeid, createdtime, firstimage, firstimage2
-        case cpyrhtDivCD = "cpyrhtDivCd"
-        case mapx, mapy, mlevel, modifiedtime, sigungucode, tel, title, zipcode
-        case lDongRegnCD = "lDongRegnCd"
-        case lDongSignguCD = "lDongSignguCd"
-        case lclsSystm1, lclsSystm2, lclsSystm3
-    }
+    let addr1, areacode, cat1, cat2, cat3, contentid, contenttypeid: String
+    let firstimage: String
+    let mapx, mapy: String
+    let title: String 
+//    let addr1, addr2, areacode: String
+//    let cat1: Cat1
+//    let cat2: Cat2
+//    let cat3, contentid, contenttypeid, createdtime: String
+//    let firstimage, firstimage2: String
+//    let cpyrhtDivCD: CpyrhtDivCD
+//    let mapx, mapy, mlevel, modifiedtime: String
+//    let sigungucode, tel, title, zipcode: String
+//    let lDongRegnCD, lDongSignguCD: String
+//    let lclsSystm1: LclsSystm1
+//    let lclsSystm2: LclsSystm2
+//    let lclsSystm3: String
+//
+//    enum CodingKeys: String, CodingKey {
+//        case addr1, addr2, areacode, cat1, cat2, cat3, contentid, contenttypeid, createdtime, firstimage, firstimage2
+//        case cpyrhtDivCD = "cpyrhtDivCd"
+//        case mapx, mapy, mlevel, modifiedtime, sigungucode, tel, title, zipcode
+//        case lDongRegnCD = "lDongRegnCd"
+//        case lDongSignguCD = "lDongSignguCd"
+//        case lclsSystm1, lclsSystm2, lclsSystm3
+//    }
 }
 
 enum Cat1: String, Codable {
