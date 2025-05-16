@@ -77,20 +77,25 @@ class NetworkManager {
     }
     
     /// 📍 음식점 리스트 받아오는 함수 (1번에 10개씩)
-    func getEateryLists() async throws -> [EateryItem] {
+    func getEateryLists(areaCode: Int? = nil) async throws -> [EateryItem] {
         var components = URLComponents(string: "\(Constants.latestbaseURLString)/areaBasedList2")
-
-        components?.queryItems = [
-            URLQueryItem(name: "serviceKey", value: Constants.api_key), // ✅ 인코딩된 키가 아님
-            URLQueryItem(name: "numOfRows", value: "10"),
+        
+        var queryItems: [URLQueryItem] = [
+            URLQueryItem(name: "serviceKey", value: Constants.api_key),
+            URLQueryItem(name: "numOfRows", value: "20"),
             URLQueryItem(name: "pageNo", value: "1"),
             URLQueryItem(name: "MobileOS", value: "ETC"),
             URLQueryItem(name: "MobileApp", value: "AppTest"),
             URLQueryItem(name: "_type", value: "json"),
-            URLQueryItem(name: "arrange", value: "Q"),
+            URLQueryItem(name: "arrange", value: "O"),
             URLQueryItem(name: "contentTypeId", value: "39")
         ]
-
+        
+        if let areaCode = areaCode {
+            queryItems.append(URLQueryItem(name: "areaCode", value: "\(areaCode)"))
+        }
+        
+        components?.queryItems = queryItems
         
         if let encodedQuery = components?.percentEncodedQuery?.replacingOccurrences(of: "%25", with: "%") {
             components?.percentEncodedQuery = encodedQuery
@@ -102,35 +107,35 @@ class NetworkManager {
             print("❌ URL 생성 실패: \(String(describing: components?.string))")
             throw URLError(.badURL)
         }
-
+        
         //print("📡 호출할 URL: \(url.absoluteString)")
-
+        
         do {
             let (data, response) = try await URLSession.shared.data(from: url)
-
+            
             if let httpResponse = response as? HTTPURLResponse {
                 print("🔹 상태 코드: \(httpResponse.statusCode)")
             }
-
+            
             /*
-            // 👉 받은 데이터를 문자열로 출력
-            if let rawString = String(data: data, encoding: .utf8) {
-                print("📦 받은 응답 본문:\n\(rawString)")
-            }
-            */
-
+             // 👉 받은 데이터를 문자열로 출력
+             if let rawString = String(data: data, encoding: .utf8) {
+             print("📦 받은 응답 본문:\n\(rawString)")
+             }
+             */
+            
             let decoded = try JSONDecoder().decode(EateryWelcome.self, from: data)
-           // print("✅ 디코딩 성공, 항목 개수: \(decoded.response.body.items.item.count)")
+            // print("✅ 디코딩 성공, 항목 개수: \(decoded.response.body.items.item.count)")
             return decoded.response.body.items.item
-
+            
         } catch let decodingError as DecodingError {
             print("❌ 디코딩 오류: \(decodingError)")
             throw decodingError
-
+            
         } catch {
             print("❌ 네트워크 요청 오류: \(error.localizedDescription)")
             throw error
         }
     }
-
+    
 }

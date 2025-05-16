@@ -11,11 +11,13 @@ import Foundation
 enum EaterySection: Int, CaseIterable {
     case category    // 음식점 카테고리
     case list        // 음식점 리스트
+    case gyeonggido
     
     var title: String {
         switch self {
         case .category: return "카테고리"
         case .list:     return "음식점"
+        case .gyeonggido: return "경기도"
         }
     }
 }
@@ -24,6 +26,7 @@ enum EaterySection: Int, CaseIterable {
 enum EateryItemType: Hashable {
     case category(CategoryEmogi)
     case eatery(EateryItem)
+    case gyeonggido(EateryItem)
     
     // Hashable 지원
     func hash(into hasher: inout Hasher) {
@@ -31,6 +34,8 @@ enum EateryItemType: Hashable {
         case .category(let category):
             hasher.combine(category.name)
         case .eatery(let eatery):
+            hasher.combine(eatery.contentid)
+        case .gyeonggido(let eatery):
             hasher.combine(eatery.contentid)
         }
     }
@@ -40,6 +45,8 @@ enum EateryItemType: Hashable {
         case (.category(let a), .category(let b)):
             return a.name == b.name
         case (.eatery(let a), .eatery(let b)):
+            return a.contentid == b.contentid
+        case (.gyeonggido(let a), .gyeonggido(let b)):
             return a.contentid == b.contentid
         default:
             return false

@@ -38,6 +38,8 @@ class HomeViewController: UIViewController {
         
         setupCollectionView()
         createDataSource()
+        
+        
     }
     
     
@@ -54,17 +56,22 @@ class HomeViewController: UIViewController {
         view.addSubview(recommendationCollectionView)
         
         recommendationCollectionView.register(RecommendationCell.self, forCellWithReuseIdentifier: RecommendationCell.reuseIdentifier)
+        
         recommendationCollectionView.register(CategoryCell.self, forCellWithReuseIdentifier: CategoryCell.reuseIdentifier)
         
+        recommendationCollectionView.register(GyeonggiCell.self, forCellWithReuseIdentifier: GyeonggiCell.reuseIdentifier)
+        
+        recommendationCollectionView.register(SectionHeader.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: SectionHeader.reuseIdentifier)
     }
     
     /// 컬렉션 뷰에 표시할 데이터를 구성하고 적용하는 메서드
     private func reloadData() {
         var snapshot = NSDiffableDataSourceSnapshot<EaterySection, EateryItemType>()
         
-        snapshot.appendSections([.category, .list])
+        snapshot.appendSections([.category, .list, .gyeonggido])
         snapshot.appendItems(categoriesViewModel.emojiCategories.map { .category($0) }, toSection: .category)
         snapshot.appendItems(eateriesViewModel.eateries.map { .eatery($0) }, toSection: .list)
+        snapshot.appendItems(eateriesViewModel.gyeonggiEateries.map { .gyeonggido($0)}, toSection: .gyeonggido)
         
         dataSource?.apply(snapshot, animatingDifferences: true)
     }
@@ -87,8 +94,41 @@ class HomeViewController: UIViewController {
                 
                 cell?.configure(with: emojiCategory)
                 return cell
+                
+            case .gyeonggido(let gyeonggido):
+                let cell =
+                collectionView.dequeueReusableCell(withReuseIdentifier: GyeonggiCell.reuseIdentifier, for: indexPath) as? GyeonggiCell
+                
+                cell?.configure(with: gyeonggido)
+                return cell
+            }
+        }
+        
+        
+        dataSource?.supplementaryViewProvider = { [weak self] collectionView, kind, indexPath in
+            
+            
+            // ✅ 헤더 뷰 dequeue
+            guard let sectionHeader = collectionView.dequeueReusableSupplementaryView(
+                ofKind: kind,
+                withReuseIdentifier: SectionHeader.reuseIdentifier,
+                for: indexPath
+            ) as? SectionHeader else {
+                return nil
             }
             
+            
+            // 섹션 번호 -> EaterySection 변환
+            guard let section = EaterySection(rawValue: indexPath.section) else { return nil }
+            
+            // 특정 섹션에는 헤더 안보이게 처리
+            switch section {
+            case .category, .list:
+                return nil
+            case .gyeonggido:
+                sectionHeader.configure(main: "부대찌개만 있는게 아니죠 🙅", sub: "다양한 음식이 있는 경기도")
+                return sectionHeader
+            }
         }
     }
     
@@ -103,6 +143,9 @@ class HomeViewController: UIViewController {
                 
             case .list:
                 return self.createFeaturedSection(using: self.eateriesViewModel.eateries)
+                
+            case .gyeonggido:
+                return self.createMediumSection(using: self.eateriesViewModel.gyeonggiEateries)
             }
         }
         
@@ -148,6 +191,36 @@ class HomeViewController: UIViewController {
         section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16)
         
         return section
+    }
+    
+    ///  지역별 음식점 소개 UI를 담당하는 메서드
+    private func createMediumSection(using section: [EateryItem]) -> NSCollectionLayoutSection {
+        let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.93), heightDimension: .fractionalHeight(0.33))
+        
+        let layoutItem = NSCollectionLayoutItem(layoutSize: itemSize)
+        layoutItem.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 5, bottom: 0, trailing: 5)
+        
+        let layoutGroupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.93), heightDimension: .fractionalWidth(0.55))
+        
+        let layoutGroup = NSCollectionLayoutGroup.vertical(layoutSize: layoutGroupSize, subitems: [layoutItem])
+        
+        let layoutSection = NSCollectionLayoutSection(group: layoutGroup)
+        layoutSection.orthogonalScrollingBehavior = .groupPagingCentered
+        
+        let layoutSectionHeader = createSectionHeader()
+        layoutSection.boundarySupplementaryItems = [layoutSectionHeader]
+        
+        return layoutSection
+    }
+    
+    /// 각 섹션 헤더 UI를 담당하는 메서드
+    private func createSectionHeader() -> NSCollectionLayoutBoundarySupplementaryItem {
+        let layoutSectionHeaderSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.93), heightDimension: .estimated(80))
+        let layoutSectionHeader = NSCollectionLayoutBoundarySupplementaryItem(
+            layoutSize: layoutSectionHeaderSize,
+            elementKind: UICollectionView.elementKindSectionHeader,
+            alignment: .top)
+        return layoutSectionHeader
     }
 }
 
@@ -211,12 +284,13 @@ extension HomeViewController {
     /// 음식점 리스트를 담고 있는 배열을 바인딩 하는 메서드
     private func bindViewModel() {
         
-        Publishers.CombineLatest(
+        Publishers.CombineLatest3(
             categoriesViewModel.$emojiCategories,
-            eateriesViewModel.$eateries
-            )
+            eateriesViewModel.$eateries,
+            eateriesViewModel.$gyeonggiEateries
+        )
         .receive(on: DispatchQueue.main)
-        .sink { [weak self] _, _ in
+        .sink { [weak self] _, _, _ in
             self?.reloadData()
         }
         .store(in: &cancellables)

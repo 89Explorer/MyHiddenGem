@@ -45,13 +45,13 @@ class RecommendationCell: UICollectionViewCell {
             for: UIFont.systemFont(ofSize: 12, weight: .bold))
         tagLine.textColor = .systemBlue
         
-        title.font = UIFont.preferredFont(forTextStyle: .title2)
+        title.font = UIFont.preferredFont(forTextStyle: .headline)
         title.textColor = .label
         
         subTitle.font = UIFont.preferredFont(forTextStyle: .subheadline)
         subTitle.textColor = .secondaryLabel
         
-        imageView.layer.cornerRadius = 5
+        imageView.layer.cornerRadius = 8
         imageView.clipsToBounds = true
         imageView.contentMode = .scaleAspectFill
         

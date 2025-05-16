@@ -13,23 +13,25 @@ class EateryViewModel: ObservableObject {
     
     // MARK: - Variable
     @Published var eateries: [EateryItem] = []
+    @Published var gyeonggiEateries: [EateryItem] = []
     @Published var errorMessage: String? = nil
-    
-    private var cancellables: Set<AnyCancellable> = []
-    
     
     // MARK: - Function
     func fetchEateries() async {
         errorMessage = nil
         
+        // ✅ async let → 병렬 실행
+        async let nationwideTask: [EateryItem] = NetworkManager.shared.getEateryLists()
+        async let gyeonggiTask: [EateryItem] = NetworkManager.shared.getEateryLists(areaCode: 1)
+        
         do {
-            let result = try await NetworkManager.shared.getEateryLists()
-            self.eateries = result
-            print("✅ ViewModel: \(result.count)개 음식점 로딩")
+            let (nationwide, gyeonggi) = try await (nationwideTask, gyeonggiTask)
+            self.eateries = nationwide
+            self.gyeonggiEateries = gyeonggi
+            print("✅ ViewModel: 전국 \(nationwide.count)개, 경기 \(gyeonggi.count)개 음식점 로딩")
         } catch {
             self.errorMessage = error.localizedDescription
-            print("❌ ")
+            print("❌ ViewModel 에러: \(error.localizedDescription)")
         }
     }
-    
 }
