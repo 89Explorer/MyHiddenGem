@@ -14,6 +14,8 @@ class HomeViewController: UIViewController {
     
     private let categoriesViewModel: CategoryViewModel = CategoryViewModel()
     private let eateriesViewModel: EateryViewModel = EateryViewModel()
+    private var loadingViewModel: LoadingViewModel!
+    
     private var cancellables: Set<AnyCancellable> = []
     
     private var dataSource: UICollectionViewDiffableDataSource<EaterySection, EateryItemType>?
@@ -22,6 +24,7 @@ class HomeViewController: UIViewController {
     // MARK: - UI Componnets
     
     private var recommendationCollectionView: UICollectionView!
+    private let activityIndicator = UIActivityIndicatorView(style: .large)
     
     
     // MARK: - Life Cycle
@@ -32,6 +35,8 @@ class HomeViewController: UIViewController {
         
         setupHeaderView(with: "투데이")
         setupHeaderButtons()
+        
+        bindLoading()
         
         bindViewModel()
         fetchCategories()
@@ -54,6 +59,9 @@ class HomeViewController: UIViewController {
         recommendationCollectionView.showsVerticalScrollIndicator = false
         
         view.addSubview(recommendationCollectionView)
+        view.addSubview(activityIndicator)
+        
+        activityIndicator.center = view.center
         
         recommendationCollectionView.register(RecommendationCell.self, forCellWithReuseIdentifier: RecommendationCell.reuseIdentifier)
         
@@ -281,7 +289,7 @@ extension HomeViewController {
     
     // MARK: - Functions
     
-    /// 음식점 리스트를 담고 있는 배열을 바인딩 하는 메서드
+    /// ViewModel의 데이터 변경 시 CollectionView Snapshot 갱신
     private func bindViewModel() {
         
         Publishers.CombineLatest3(
@@ -295,6 +303,28 @@ extension HomeViewController {
         }
         .store(in: &cancellables)
         
+    }
+    
+    /// 각 ViewModel에서 데이터를 받았는지 여부를 isLoading에 저장, 비교하여 감지하는 메서드 
+    private func bindLoading() {
+        loadingViewModel = LoadingViewModel(
+            eateryVM: eateriesViewModel,
+            categoryVM: categoriesViewModel
+        )
+        
+        loadingViewModel.$isLoading
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isLoading in
+                if isLoading {
+                    self?.activityIndicator.startAnimating()
+                    self?.recommendationCollectionView.isHidden = true
+                } else {
+                    self?.activityIndicator.stopAnimating()
+                    self?.recommendationCollectionView.isHidden = false
+                    self?.recommendationCollectionView.reloadData()
+                }
+            }
+            .store(in: &cancellables)
     }
     
     /// 음식점 리스트를 외부에서 요청하는 메서드

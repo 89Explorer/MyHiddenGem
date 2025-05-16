@@ -87,7 +87,7 @@ class NetworkManager {
             URLQueryItem(name: "MobileOS", value: "ETC"),
             URLQueryItem(name: "MobileApp", value: "AppTest"),
             URLQueryItem(name: "_type", value: "json"),
-            URLQueryItem(name: "arrange", value: "O"),
+            URLQueryItem(name: "arrange", value: "R"),
             URLQueryItem(name: "contentTypeId", value: "39")
         ]
         
