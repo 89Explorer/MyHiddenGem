@@ -15,6 +15,9 @@ class EateryViewModel: ObservableObject {
     // MARK: - Variable
     @Published var eateries: [EateryItem] = []
     @Published var gyeonggiEateries: [EateryItem] = []
+    @Published var seoulEateries: [EateryItem] = []
+    @Published var incheonEateries: [EateryItem] = []
+    
     @Published var errorMessage: String? = nil
     @Published var isLoading = true
     
@@ -25,13 +28,18 @@ class EateryViewModel: ObservableObject {
         
         // ✅ async let → 병렬 실행
         async let nationwideTask: [EateryItem] = NetworkManager.shared.getEateryLists()
-        async let gyeonggiTask: [EateryItem] = NetworkManager.shared.getEateryLists(areaCode: 1)
+        async let gyeonggiTask: [EateryItem] = NetworkManager.shared.getEateryLists(areaCode: 31)
+        async let seoulTask: [EateryItem] = NetworkManager.shared.getEateryLists(areaCode: 1)
+        async let incheonTask: [EateryItem] = NetworkManager.shared.getEateryLists(areaCode: 2)
         
         do {
-            let (nationwide, gyeonggi) = try await (nationwideTask, gyeonggiTask)
+            let (nationwide, gyeonggi, seoul, incheon) = try await (nationwideTask, gyeonggiTask, seoulTask, incheonTask)
             self.eateries = nationwide
             self.gyeonggiEateries = gyeonggi
-            print("✅ ViewModel: 전국 \(nationwide.count)개, 경기 \(gyeonggi.count)개 음식점 로딩")
+            self.seoulEateries = seoul
+            self.incheonEateries = incheon
+            
+            print("✅ ViewModel: 전국 \(nationwide.count)개, 경기 \(gyeonggi.count)개 음식점 로딩, 서울\(seoul.count)개 음식점 로딩, 인천 \(incheon.count)개 음식점 로딩")
 
         } catch {
             self.errorMessage = error.localizedDescription

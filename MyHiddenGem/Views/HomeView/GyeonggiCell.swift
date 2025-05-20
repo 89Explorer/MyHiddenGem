@@ -36,6 +36,11 @@ class GyeonggiCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        imageView.image = nil
+    }
+    
     
     // MARK: - Function
     
@@ -75,7 +80,7 @@ class GyeonggiCell: UICollectionViewCell {
             imageView.widthAnchor.constraint(equalToConstant: 80)
             
         ])
-
+        
     }
     
     /// 각 UI에 데이터를 할당하는 함수
@@ -87,7 +92,9 @@ class GyeonggiCell: UICollectionViewCell {
         title.text = eateries.title
         subTitle.text = eateries.addr1
         
+        
         let posterPath = URL(string: eateries.firstimage)
-        imageView.sd_setImage(with: posterPath, completed: nil)
+        self.imageView.sd_setImage(with: posterPath, completed: nil)
+        
     }
 }

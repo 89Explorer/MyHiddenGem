@@ -44,7 +44,6 @@ class HomeViewController: UIViewController {
         setupCollectionView()
         createDataSource()
         
-        
     }
     
     
@@ -76,10 +75,12 @@ class HomeViewController: UIViewController {
     private func reloadData() {
         var snapshot = NSDiffableDataSourceSnapshot<EaterySection, EateryItemType>()
         
-        snapshot.appendSections([.category, .list, .gyeonggido])
+        snapshot.appendSections([.category, .list, .gyeonggido, .seoul, .incheon])
         snapshot.appendItems(categoriesViewModel.emojiCategories.map { .category($0) }, toSection: .category)
         snapshot.appendItems(eateriesViewModel.eateries.map { .eatery($0) }, toSection: .list)
         snapshot.appendItems(eateriesViewModel.gyeonggiEateries.map { .gyeonggido($0)}, toSection: .gyeonggido)
+        snapshot.appendItems(eateriesViewModel.seoulEateries.map { .seoul($0)}, toSection: .seoul)
+        snapshot.appendItems(eateriesViewModel.incheonEateries.map { .incheon($0)}, toSection: .incheon)
         
         dataSource?.apply(snapshot, animatingDifferences: true)
     }
@@ -109,12 +110,22 @@ class HomeViewController: UIViewController {
                 
                 cell?.configure(with: gyeonggido)
                 return cell
+                
+            case .seoul(let seoul):
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: GyeonggiCell.reuseIdentifier, for: indexPath) as? GyeonggiCell
+                
+                cell?.configure(with: seoul)
+                return cell
+                
+            case .incheon(let incheon):
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: GyeonggiCell.reuseIdentifier, for: indexPath) as? GyeonggiCell
+                
+                cell?.configure(with: incheon)
+                return cell
             }
         }
         
-        
         dataSource?.supplementaryViewProvider = { [weak self] collectionView, kind, indexPath in
-            
             
             // ✅ 헤더 뷰 dequeue
             guard let sectionHeader = collectionView.dequeueReusableSupplementaryView(
@@ -134,7 +145,13 @@ class HomeViewController: UIViewController {
             case .category, .list:
                 return nil
             case .gyeonggido:
-                sectionHeader.configure(main: "부대찌개만 있는게 아니죠 🙅", sub: "다양한 음식이 있는 경기도")
+                sectionHeader.configure(main: "부대찌개만 있는게 아니죠 🙅", sub: "다양한 음식이 있는 도시, 경기도")
+                return sectionHeader
+            case .seoul:
+                sectionHeader.configure(main: "남산돈가스 또 먹어요? 🤷", sub: "먹을게 넘치는 도시, 서울")
+                return sectionHeader
+            case .incheon:
+                sectionHeader.configure(main: "젓국갈비 먹어봤어요? 🙆", sub: "짜장면, 쫄면의 도시, 인천")
                 return sectionHeader
             }
         }
@@ -154,6 +171,12 @@ class HomeViewController: UIViewController {
                 
             case .gyeonggido:
                 return self.createMediumSection(using: self.eateriesViewModel.gyeonggiEateries)
+                
+            case .seoul:
+                return self.createMediumSection(using: self.eateriesViewModel.seoulEateries)
+                
+            case .incheon:
+                return self.createMediumSection(using: self.eateriesViewModel.incheonEateries)
             }
         }
         
@@ -162,6 +185,7 @@ class HomeViewController: UIViewController {
         layout.configuration = config
         return layout
     }
+    
     
     /// 오늘의 음식점 정보 UI를 담당하는 메서드
     private func createFeaturedSection(using section: [EateryItem]) -> NSCollectionLayoutSection {
@@ -292,15 +316,15 @@ extension HomeViewController {
     /// ViewModel의 데이터 변경 시 CollectionView Snapshot 갱신
     private func bindViewModel() {
         
-        Publishers.CombineLatest3(
-            categoriesViewModel.$emojiCategories,
-            eateriesViewModel.$eateries,
-            eateriesViewModel.$gyeonggiEateries
-        )
-        .receive(on: DispatchQueue.main)
-        .sink { [weak self] _, _, _ in
-            self?.reloadData()
-        }
+        categoriesViewModel.$emojiCategories
+            .combineLatest(eateriesViewModel.$eateries)
+            .combineLatest(eateriesViewModel.$gyeonggiEateries)
+            .combineLatest(eateriesViewModel.$seoulEateries)
+            .combineLatest(eateriesViewModel.$incheonEateries)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.reloadData()
+            }
         .store(in: &cancellables)
         
     }
