@@ -8,19 +8,24 @@
 import Foundation
 import Combine
 
+
 @MainActor
 final class LoadingViewModel {
     @Published var isLoading: Bool = true
-    
+
     private var cancellables = Set<AnyCancellable>()
-    
-    init(eateryVM: EateryViewModel, categoryVM: CategoryViewModel) {
-        Publishers.CombineLatest(
+
+    init(eateryVM: EateryViewModel, categoryVM: CategoryViewModel, regionVM: RegionViewModel) {
+        Publishers.CombineLatest3(
             eateryVM.$isLoading,
-            categoryVM.$isLoading
+            categoryVM.$isLoading,
+            regionVM.$isLoading
         )
-            .map { $0 || $1 } // 하나라도 로딩 중이면 true
-            .assign(to: \.isLoading, on: self)
-            .store(in: &cancellables)
+        .map { $0 || $1 || $2 } // 하나라도 로딩 중이면 true
+        .receive(on: DispatchQueue.main)
+        .sink { [weak self] value in
+            self?.isLoading = value
+        }
+        .store(in: &cancellables)
     }
 }

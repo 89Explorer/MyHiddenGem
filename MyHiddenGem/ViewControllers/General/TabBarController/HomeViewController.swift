@@ -14,6 +14,7 @@ class HomeViewController: UIViewController {
     
     private let categoriesViewModel: CategoryViewModel = CategoryViewModel()
     private let eateriesViewModel: EateryViewModel = EateryViewModel()
+    private let regionCodeViewModel: RegionViewModel = RegionViewModel()
     private var loadingViewModel: LoadingViewModel!
     
     private var cancellables: Set<AnyCancellable> = []
@@ -71,16 +72,19 @@ class HomeViewController: UIViewController {
         recommendationCollectionView.register(SectionHeader.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: SectionHeader.reuseIdentifier)
     }
     
+    
     /// 컬렉션 뷰에 표시할 데이터를 구성하고 적용하는 메서드
     private func reloadData() {
         var snapshot = NSDiffableDataSourceSnapshot<EaterySection, EateryItemType>()
         
-        snapshot.appendSections([.category, .list, .gyeonggido, .seoul, .incheon])
+        snapshot.appendSections([.category, .list, .gyeonggido, .seoul, .incheon, .regionCode])
+        
         snapshot.appendItems(categoriesViewModel.emojiCategories.map { .category($0) }, toSection: .category)
         snapshot.appendItems(eateriesViewModel.eateries.map { .eatery($0) }, toSection: .list)
         snapshot.appendItems(eateriesViewModel.gyeonggiEateries.map { .gyeonggido($0)}, toSection: .gyeonggido)
         snapshot.appendItems(eateriesViewModel.seoulEateries.map { .seoul($0)}, toSection: .seoul)
         snapshot.appendItems(eateriesViewModel.incheonEateries.map { .incheon($0)}, toSection: .incheon)
+        snapshot.appendItems(regionCodeViewModel.regionList.map { .regionCode($0)} ,toSection: .regionCode)
         
         dataSource?.apply(snapshot, animatingDifferences: true)
     }
@@ -98,9 +102,7 @@ class HomeViewController: UIViewController {
                 
             case .category(let category):
                 let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CategoryCell.reuseIdentifier, for: indexPath) as? CategoryCell
-                
                 let emojiCategory = "\(category.icon) \(category.name)"
-                
                 cell?.configure(with: emojiCategory)
                 return cell
                 
@@ -121,6 +123,10 @@ class HomeViewController: UIViewController {
                 let cell = collectionView.dequeueReusableCell(withReuseIdentifier: GyeonggiCell.reuseIdentifier, for: indexPath) as? GyeonggiCell
                 
                 cell?.configure(with: incheon)
+                return cell
+            case .regionCode(let region):
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CategoryCell.reuseIdentifier, for: indexPath) as? CategoryCell
+                cell?.configure(with: region.name)
                 return cell
             }
         }
@@ -153,6 +159,9 @@ class HomeViewController: UIViewController {
             case .incheon:
                 sectionHeader.configure(main: "젓국갈비 먹어봤어요? 🙆", sub: "짜장면, 쫄면의 도시, 인천")
                 return sectionHeader
+            case .regionCode:
+                sectionHeader.configure(main: "지역 구분 🌐", sub: "지역별 음식점 소개")
+                return sectionHeader
             }
         }
     }
@@ -177,6 +186,10 @@ class HomeViewController: UIViewController {
                 
             case .incheon:
                 return self.createMediumSection(using: self.eateriesViewModel.incheonEateries)
+                
+            case .regionCode:
+                return self.createRegionSection(using: self.regionCodeViewModel.regionList)
+                
             }
         }
         
@@ -203,6 +216,7 @@ class HomeViewController: UIViewController {
         return layoutSection
     }
     
+    
     /// 음식점 카테고리 UI를 담당하는 메서드
     private func createCategorySection(using section: [StoreCategory]) -> NSCollectionLayoutSection {
         let itemSize = NSCollectionLayoutSize(
@@ -227,7 +241,7 @@ class HomeViewController: UIViewController {
     
     ///  지역별 음식점 소개 UI를 담당하는 메서드
     private func createMediumSection(using section: [EateryItem]) -> NSCollectionLayoutSection {
-        let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.93), heightDimension: .fractionalHeight(0.33))
+        let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.97), heightDimension: .fractionalHeight(0.33))
         
         let layoutItem = NSCollectionLayoutItem(layoutSize: itemSize)
         layoutItem.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 5, bottom: 0, trailing: 5)
@@ -244,6 +258,42 @@ class HomeViewController: UIViewController {
         
         return layoutSection
     }
+    
+    
+    /// 지역 구분 소개 UI를 담당하는 메서드
+    private func createRegionSection(using section: [RegionCodeModel]) -> NSCollectionLayoutSection {
+        let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.97 / 2.0), heightDimension: .fractionalHeight(1.0))
+        
+        let layoutItem = NSCollectionLayoutItem(layoutSize: itemSize)
+        layoutItem.contentInsets = NSDirectionalEdgeInsets(top: 5, leading: 5, bottom: 5, trailing: 5)
+        
+        let horizontalGroupSize = NSCollectionLayoutSize(
+            widthDimension: .fractionalWidth(1.0),
+            heightDimension: .absolute(45)
+        )
+        
+        let horizontalGroup = NSCollectionLayoutGroup.horizontal(
+            layoutSize: horizontalGroupSize,
+            subitems: [layoutItem, layoutItem] )
+        
+        let verticalGroupSize = NSCollectionLayoutSize(
+            widthDimension: .fractionalWidth(0.93),
+            heightDimension: .estimated(150)
+        )
+        
+        let verticalGroup = NSCollectionLayoutGroup.vertical(
+            layoutSize: verticalGroupSize,
+            subitems: [horizontalGroup, horizontalGroup, horizontalGroup]
+        )
+        
+        let layoutSection = NSCollectionLayoutSection(group: verticalGroup)
+        layoutSection.orthogonalScrollingBehavior = UICollectionLayoutSectionOrthogonalScrollingBehavior.groupPagingCentered
+        
+        
+        layoutSection.boundarySupplementaryItems = [createSectionHeader()]
+        return layoutSection
+    }
+
     
     /// 각 섹션 헤더 UI를 담당하는 메서드
     private func createSectionHeader() -> NSCollectionLayoutBoundarySupplementaryItem {
@@ -321,19 +371,21 @@ extension HomeViewController {
             .combineLatest(eateriesViewModel.$gyeonggiEateries)
             .combineLatest(eateriesViewModel.$seoulEateries)
             .combineLatest(eateriesViewModel.$incheonEateries)
+            .combineLatest(regionCodeViewModel.$regionList)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 self?.reloadData()
             }
-        .store(in: &cancellables)
+            .store(in: &cancellables)
         
     }
     
-    /// 각 ViewModel에서 데이터를 받았는지 여부를 isLoading에 저장, 비교하여 감지하는 메서드 
+    /// 각 ViewModel에서 데이터를 받았는지 여부를 isLoading에 저장, 비교하여 감지하는 메서드
     private func bindLoading() {
         loadingViewModel = LoadingViewModel(
             eateryVM: eateriesViewModel,
-            categoryVM: categoriesViewModel
+            categoryVM: categoriesViewModel,
+            regionVM: regionCodeViewModel
         )
         
         loadingViewModel.$isLoading
@@ -358,13 +410,12 @@ extension HomeViewController {
         Task {
             async let categoriesFetch: () = categoriesViewModel.fetchCategories()
             async let eateriesFetch: () = eateriesViewModel.fetchEateries()
+            async let regionFetch: () = regionCodeViewModel.fetchRegionCode()
             
             await categoriesFetch
             categoriesViewModel.updateCategories()
-            
             await eateriesFetch
-            //print("🍛 음식점 목록:")
-            //eateriesViewModel.eateries.forEach { print("- \($0.title)") }
+            await regionFetch
         }
     }
 }

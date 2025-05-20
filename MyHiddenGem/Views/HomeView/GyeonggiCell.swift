@@ -97,4 +97,5 @@ class GyeonggiCell: UICollectionViewCell {
         self.imageView.sd_setImage(with: posterPath, completed: nil)
         
     }
+
 }

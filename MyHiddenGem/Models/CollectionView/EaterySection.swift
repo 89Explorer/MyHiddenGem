@@ -14,6 +14,7 @@ enum EaterySection: Int, CaseIterable {
     case gyeonggido  // 경기 음식점
     case seoul       // 서울 음식점
     case incheon     // 인천 음식점
+    case regionCode  // 지역 코드
     
     var title: String {
         switch self {
@@ -22,6 +23,7 @@ enum EaterySection: Int, CaseIterable {
         case .gyeonggido: return "경기도"
         case .seoul: return "서울"
         case .incheon: return "인천"
+        case .regionCode: return "지역 구분"
         }
     }
 }
@@ -33,6 +35,7 @@ enum EateryItemType: Hashable {
     case gyeonggido(EateryItem)
     case seoul(EateryItem)
     case incheon(EateryItem)
+    case regionCode(RegionCodeModel)
     
     // Hashable 지원
     func hash(into hasher: inout Hasher) {
@@ -47,6 +50,8 @@ enum EateryItemType: Hashable {
             hasher.combine(eatery.contentid)
         case .incheon(let eatery):
             hasher.combine(eatery.contentid)
+        case .regionCode(let region):
+            hasher.combine(region.code)
         }
     }
     
@@ -62,8 +67,11 @@ enum EateryItemType: Hashable {
             return a.contentid == b.contentid
         case (.incheon(let a), .incheon(let b)):
             return a.contentid == b.contentid
+        case (.regionCode(let a), .regionCode(let b)):
+            return a.code == b.code
         default:
             return false
         }
     }
+   
 }

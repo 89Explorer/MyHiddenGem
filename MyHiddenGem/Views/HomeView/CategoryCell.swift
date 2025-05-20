@@ -58,4 +58,6 @@ class CategoryCell: UICollectionViewCell {
     func configure(with category: String) {
         label.text = category
     }
+    
+    
 }

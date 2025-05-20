@@ -10,7 +10,7 @@ import Combine
 
 
 @MainActor
-class EateryViewModel: ObservableObject {
+final class EateryViewModel: ObservableObject {
     
     // MARK: - Variable
     @Published var eateries: [EateryItem] = []
