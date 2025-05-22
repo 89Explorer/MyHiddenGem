@@ -78,6 +78,7 @@ class CategoryViewModel: ObservableObject {
         do {
             let result = try await NetworkManager.shared.getEateryLists(pageNo: pageNo, cat3: cat3)
             //self.eateryFromCategory = result
+            
             self.eateryFromCategory.append(contentsOf: result)
             print("✅ Category에서 가져온 음식점 갯수: \(result.count)개")
         } catch {

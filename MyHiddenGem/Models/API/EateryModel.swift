@@ -60,6 +60,7 @@ struct EateryItem: Codable, Hashable {
     func hash(into hasher: inout Hasher) {
         hasher.combine(contentid)
     }
+    
 }
 
 enum Cat1: String, Codable {

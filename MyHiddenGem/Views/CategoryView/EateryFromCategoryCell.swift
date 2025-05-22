@@ -85,6 +85,7 @@ class EateryFromCategoryCell: UICollectionViewCell {
     /// 각 UI 에 데이터를 할당하는 함수
     func configure(with eateries: EateryItem) {
         
+        
         title.text = eateries.title
         
         // 주소 정보를 " " 기준으로 나눠 주소 소개
@@ -97,6 +98,20 @@ class EateryFromCategoryCell: UICollectionViewCell {
         
         let posterPath = URL(string: eateries.firstimage)
         self.imageView.sd_setImage(with: posterPath, completed: nil)
+        
+        /*
+        // 클라이언트에서 압축후 ImageView에 표시 -> 지역별 음식점 리스트를 가져올 떄 이미지로딩이 텍스트 보다 오래 걸림
+        let transformer = SDImageResizingTransformer(size: CGSize(width: 200, height: 150), scaleMode: .aspectFill)
+        imageView.sd_setImage(
+            with: URL(string: eateries.firstimage),
+            placeholderImage: UIImage(named: "placeholder"),
+            options: [],
+            context: [.imageTransformer: transformer]
+        )
+         */
     }
 
 }
+
+
+

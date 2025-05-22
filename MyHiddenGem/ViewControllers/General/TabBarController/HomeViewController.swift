@@ -445,8 +445,10 @@ extension HomeViewController: UICollectionViewDelegate {
         case .seoul(let seoul):
             print("선택된 서울 음식점: \(seoul.title)")
         case .regionCode(let region):
-            print("선택된 지역 코드: \(region.name)")
             
+            let regionVC = EateryFromRegionViewController(regionCode: region.code, regionName: region.name)
+            navigationController?.pushViewController(regionVC, animated: true)
+                    
         }
     }
 }

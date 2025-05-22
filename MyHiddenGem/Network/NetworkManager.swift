@@ -76,7 +76,7 @@ class NetworkManager {
         }
     }
     
-    /// 📍 음식점 리스트 받아오는 함수 (1번에 10개씩)
+    /// 📍 음식점 리스트 받아오는 함수 (1번에 20개씩)
     func getEateryLists(pageNo: String? = nil, areaCode: Int? = nil, cat1: String? = "A05", cat2: String? = "A0502", cat3: String? = nil) async throws -> [EateryItem] {
         var components = URLComponents(string: "\(Constants.latestbaseURLString)/areaBasedList2")
         
@@ -91,7 +91,7 @@ class NetworkManager {
             URLQueryItem(name: "contentTypeId", value: "39"),
             URLQueryItem(name: "cat1", value: cat1),
             URLQueryItem(name: "cat2", value: cat2),
-            URLQueryItem(name: "cat3", value: cat3)
+            URLQueryItem(name: "cat3", value: cat3),
             
         ]
         

@@ -1,38 +1,41 @@
 //
-//  CategoryViewController.swift
+//  EateryFromRegionViewController.swift
 //  MyHiddenGem
 //
-//  Created by 권정근 on 5/20/25.
+//  Created by 권정근 on 5/22/25.
 //
 
 import UIKit
 import Combine
 
-class CategoryViewController: UIViewController {
+
+class EateryFromRegionViewController: UIViewController {
+    
     
     // MARK: - Variable
     
-    private var categoryCode: String = ""
-    private var categoryName: String = ""
+    private var regionCode: String = ""
+    private var regionName: String = ""
     private var pageNo: Int = 1
     
-    private let categoriesViewModel: CategoryViewModel = CategoryViewModel()
+    private let regionViewModel: RegionViewModel = RegionViewModel()
     private var cancellables: Set<AnyCancellable> = []
     
-    private var dataSource: UICollectionViewDiffableDataSource<EateryFromCategorySection, EateryFromCategoryType>?
-    
+    private var dataSource: UICollectionViewDiffableDataSource<EateryFromRegionSection, EateryFromRegionType>?
     
     
     // MARK: - UI Component
+    
     private var eateryCollectionView: UICollectionView!
+    private let activityIndicator = UIActivityIndicatorView(style: .large)
     
+
+    // MARK: - Init
     
-    // MARK: - init
-    
-    init(code: String, name: String) {
+    init(regionCode: String, regionName: String) {
         super.init(nibName: nil, bundle: nil)
-        self.categoryCode = code
-        self.categoryName = name
+        self.regionCode = regionCode
+        self.regionName = regionName
     }
     
     required init?(coder: NSCoder) {
@@ -40,35 +43,35 @@ class CategoryViewController: UIViewController {
     }
     
     
+    
     // MARK: - Life Cycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
-        
-        print("✅ 선택된 카테고리 이름: \(categoryName), 선택된 카테고리 코드: \(categoryCode)")
-        
+
         setupNavigationBar()
-        fetchEateryFromCategory()
+        fetchEateryFromRegion()
         bindViewModel()
+        //bindLoading()
         
         setupCollectionView()
         createDataSource()
         
         eateryCollectionView.delegate = self
-        categoriesViewModel.clearEateryData()
-    }
+        regionViewModel.clearEateryData()
     
+    }
 }
 
 
 // MARK: - Extension: 네비게이션 바 세팅
 
-extension CategoryViewController {
+extension EateryFromRegionViewController {
 
     /// 네비게이션바 설정하는 함수
     func setupNavigationBar() {
-        navigationItem.title = categoryName
+        navigationItem.title = regionName
  
         navigationItem.hidesBackButton = true
         let backBarButton = UIBarButtonItem(image: UIImage(systemName: "chevron.backward.circle.fill"), style: .done, target: self, action: #selector(didTappedBackButton))
@@ -83,37 +86,59 @@ extension CategoryViewController {
 }
 
 
-// MARK: - CategoryViewController
-
-extension CategoryViewController {
+// MARK: - Extension: 바인딩 함수
+extension EateryFromRegionViewController {
     
     
-    /// 카테고리에 따른 음식점 리스트를 요청하는 메서드
-    private func fetchEateryFromCategory() {
+    /// 외부 API를 통해 지역 내 음식점 리스트를 받아오는 메서드
+    private func fetchEateryFromRegion() {
+        
+        guard let areaCode = Int(regionCode) else { return }
         
         Task {
-            async let eateryList: () = categoriesViewModel.fetchEateryFromCategory(pageNo: "\(pageNo)", cat3: categoryCode)
+            
+            async let eateryList: () = regionViewModel.fetchEateryFromRegion(pageNo:"\(pageNo)", areaCode: areaCode)
             await eateryList
         }
+        
     }
     
-    /// 카테고리에 해당하는 음식점 리스트를 감지하는 메서드 
+    /// 받아온 음식점 리스트를 감지하는 메서드
     private func bindViewModel() {
         
-        categoriesViewModel.$eateryFromCategory
+        regionViewModel.$eateryFromRegion
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                //print("✅ 가져오기 성공! \(items.count) 개")
+            .sink { [weak self] items in
                 self?.reloadData()
             }
             .store(in: &cancellables)
     }
+    
+    
+    /// 데이터 로딩 중에는 인디게이터를 보여주는 메서드
+    private func bindLoading() {
+        regionViewModel.$isLoading
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isLoading in
+                if isLoading {
+                    self?.activityIndicator.startAnimating()
+                    self?.eateryCollectionView.isHidden = true
+                } else {
+                    self?.activityIndicator.stopAnimating()
+                    self?.eateryCollectionView.isHidden = false
+                    self?.eateryCollectionView.reloadData()
+                }
+            }
+            .store(in: &cancellables)
+    }
+    
 }
 
 
-// MARK: - Extension: CollectionView 설멍
+// MARK: - Extension: CollectionView 설정
 
-extension CategoryViewController {
+extension EateryFromRegionViewController {
+    
     
     /// eateryCollectionView 설정하는 메서드
     private func setupCollectionView() {
@@ -122,8 +147,12 @@ extension CategoryViewController {
         eateryCollectionView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         eateryCollectionView.backgroundColor = .systemBackground
         eateryCollectionView.showsHorizontalScrollIndicator = false
+        eateryCollectionView.showsVerticalScrollIndicator = false
         
         view.addSubview(eateryCollectionView)
+        view.addSubview(activityIndicator)
+        
+        activityIndicator.center = view.center
         
         eateryCollectionView.register(EateryFromCategoryCell.self, forCellWithReuseIdentifier: EateryFromCategoryCell.reuseIdentifier)
         
@@ -131,20 +160,20 @@ extension CategoryViewController {
     
     
     private func reloadData() {
-        var snapshot = NSDiffableDataSourceSnapshot<EateryFromCategorySection, EateryFromCategoryType>()
+        var snapshot = NSDiffableDataSourceSnapshot<EateryFromRegionSection, EateryFromRegionType>()
         
-        snapshot.appendSections([.category])
+        snapshot.appendSections([.region])
         
-        snapshot.appendItems(categoriesViewModel.eateryFromCategory.map { .category($0) }, toSection: .category)
+        snapshot.appendItems(regionViewModel.eateryFromRegion.map { .region($0)}, toSection: .region)
         
         dataSource?.apply(snapshot, animatingDifferences: true)
     }
     
     
     private func createDataSource() {
-        dataSource = UICollectionViewDiffableDataSource<EateryFromCategorySection, EateryFromCategoryType>(collectionView: eateryCollectionView) { collectionView, indexPath,   item in
+        dataSource = UICollectionViewDiffableDataSource<EateryFromRegionSection, EateryFromRegionType>(collectionView: eateryCollectionView) { collectionView, indexPath,   item in
             switch item {
-            case .category(let eatery):
+            case .region(let eatery):
                 let cell = collectionView.dequeueReusableCell(withReuseIdentifier: EateryFromCategoryCell.reuseIdentifier, for: indexPath) as? EateryFromCategoryCell
                 cell?.configure(with: eatery)
                 return cell
@@ -160,7 +189,7 @@ extension CategoryViewController {
             
             switch sectionIdentifier {
             case .category:
-                return self.createFeaturedSection(using: self.categoriesViewModel.eateryFromCategory)
+                return self.createFeaturedSection(using: self.regionViewModel.eateryFromRegion)
             }
         }
         
@@ -189,28 +218,16 @@ extension CategoryViewController {
 
 
 // MARK: - Extension: 데이터를 가져오는 페이징 기능 설정
-extension CategoryViewController: UICollectionViewDelegate {
-    
-//    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-//        let contentOffsetY = scrollView.contentOffset.y
-//        let collectionViewHeight = eateryCollectionView.contentSize.height
-//        let pagination = collectionViewHeight * 0.45
-//        
-//        if contentOffsetY > collectionViewHeight - pagination && !categoriesViewModel.isLoading {
-//            pageNo += 1
-//            fetchEateryFromCategory()
-//        }
-//    }
-    
+
+extension EateryFromRegionViewController: UICollectionViewDelegate {
     
     // ✅ 마지막 셀 감지해서 데이터 요청하기
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        let itemCount = categoriesViewModel.eateryFromCategory.count
+        let itemCount = regionViewModel.eateryFromRegion.count
         
-        if indexPath.item == itemCount - 1 && !categoriesViewModel.isLoading {
+        if indexPath.item == itemCount - 1 && !regionViewModel.isLoading {
             pageNo += 1
-            fetchEateryFromCategory()
+            fetchEateryFromRegion()
         }
     }
-
 }
