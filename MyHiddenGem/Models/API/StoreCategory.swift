@@ -36,6 +36,7 @@ struct ItemList: Codable {
 /// 이모지를 폼할할 새 모델
 struct CategoryEmogi: Hashable {
     let id = UUID()
+    let code: String
     let name: String
     let icon: String
     

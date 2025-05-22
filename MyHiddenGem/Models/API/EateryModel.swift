@@ -30,7 +30,7 @@ struct EateryItems: Codable {
 }
 
 // MARK: - EateryItem
-struct EateryItem: Codable {
+struct EateryItem: Codable, Hashable {
     let addr1, areacode, cat1, cat2, cat3, contentid, contenttypeid: String
     let firstimage: String
     let mapx, mapy: String
@@ -56,6 +56,10 @@ struct EateryItem: Codable {
 //        case lDongSignguCD = "lDongSignguCd"
 //        case lclsSystm1, lclsSystm2, lclsSystm3
 //    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(contentid)
+    }
 }
 
 enum Cat1: String, Codable {
@@ -84,3 +88,5 @@ enum LclsSystm2: String, Codable {
 struct EateryHeader: Codable {
     let resultCode, resultMsg: String
 }
+
+

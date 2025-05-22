@@ -48,4 +48,6 @@ final class EateryViewModel: ObservableObject {
         
         self.isLoading = false // 성공, 실패 모두
     }
+    
+    
 }

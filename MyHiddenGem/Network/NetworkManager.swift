@@ -77,18 +77,22 @@ class NetworkManager {
     }
     
     /// 📍 음식점 리스트 받아오는 함수 (1번에 10개씩)
-    func getEateryLists(areaCode: Int? = nil) async throws -> [EateryItem] {
+    func getEateryLists(pageNo: String? = nil, areaCode: Int? = nil, cat1: String? = "A05", cat2: String? = "A0502", cat3: String? = nil) async throws -> [EateryItem] {
         var components = URLComponents(string: "\(Constants.latestbaseURLString)/areaBasedList2")
         
         var queryItems: [URLQueryItem] = [
             URLQueryItem(name: "serviceKey", value: Constants.api_key),
             URLQueryItem(name: "numOfRows", value: "20"),
-            URLQueryItem(name: "pageNo", value: "1"),
+            URLQueryItem(name: "pageNo", value: pageNo),
             URLQueryItem(name: "MobileOS", value: "ETC"),
             URLQueryItem(name: "MobileApp", value: "AppTest"),
             URLQueryItem(name: "_type", value: "json"),
             URLQueryItem(name: "arrange", value: "R"),
-            URLQueryItem(name: "contentTypeId", value: "39")
+            URLQueryItem(name: "contentTypeId", value: "39"),
+            URLQueryItem(name: "cat1", value: cat1),
+            URLQueryItem(name: "cat2", value: cat2),
+            URLQueryItem(name: "cat3", value: cat3)
+            
         ]
         
         if let areaCode = areaCode {
@@ -138,6 +142,8 @@ class NetworkManager {
         }
     }
     
+    
+    /// 지역 코드 정보를 받아오는 메서드
     func getRegionCode() async throws -> [RegionCodeModel] {
         
         var components = URLComponents(string: "\(Constants.latestbaseURLString)/areaCode2")

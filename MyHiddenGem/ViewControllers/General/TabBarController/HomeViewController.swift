@@ -45,6 +45,7 @@ class HomeViewController: UIViewController {
         setupCollectionView()
         createDataSource()
         
+        recommendationCollectionView.delegate = self
     }
     
     
@@ -416,6 +417,36 @@ extension HomeViewController {
             categoriesViewModel.updateCategories()
             await eateriesFetch
             await regionFetch
+        }
+    }
+}
+
+
+// MARK: - Extension: UICollectionViewDelegate
+
+extension HomeViewController: UICollectionViewDelegate {
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        
+        guard let seletedItem = dataSource?.itemIdentifier(for: indexPath) else { return }
+        
+        switch seletedItem {
+            
+        case .category(let category):
+            
+            let categoryVC = CategoryViewController(code: category.code, name: category.name)
+            navigationController?.pushViewController(categoryVC, animated: true)
+            
+        case .eatery(let eatery):
+            print("선택된 음식점: \(eatery.title)")
+        case .gyeonggido(let gyeonggido):
+            print("선택된 경기도 음식점: \(gyeonggido.title)")
+        case .incheon(let incheon):
+            print("선택된 인천 음식점: \(incheon.title)")
+        case .seoul(let seoul):
+            print("선택된 서울 음식점: \(seoul.title)")
+        case .regionCode(let region):
+            print("선택된 지역 코드: \(region.name)")
+            
         }
     }
 }
