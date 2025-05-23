@@ -39,6 +39,7 @@ struct CategoryEmogi: Hashable {
     let code: String
     let name: String
     let icon: String
+    var isSelected: Bool = false 
     
     var displayName: String {
         return "\(icon) \(name)"

@@ -13,6 +13,16 @@ class CategoryCell: UICollectionViewCell {
     static let reuseIdentifier: String = "CategoryCell"
     
     
+    override var isSelected: Bool {
+        
+        didSet {
+            contentView.backgroundColor = isSelected ? .label : .systemGray6
+            label.textColor = isSelected ? .systemBackground :
+                .label
+        }
+    }
+    
+    
     // MARK: - UI Component
     private let label: UILabel = UILabel()
     
@@ -31,6 +41,11 @@ class CategoryCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        label.text = nil
+    }
+
     
     // MARK: - Function
     private func setupUI() {

@@ -17,6 +17,8 @@ class CategoryViewModel: ObservableObject {
     @Published var emojiCategories: [CategoryEmogi] = []
     @Published var eateryFromCategory: [EateryItem] = []
     
+    
+    
     @Published var isLoading: Bool = false
     @Published var errorMessage: String? = nil
     

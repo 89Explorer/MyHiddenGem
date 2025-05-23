@@ -40,12 +40,12 @@ final class RegionViewModel {
     
     
     /// 지역코드를 기반으로 음식점 리스트 받아오는 메서드
-    func fetchEateryFromRegion(pageNo: String? = nil, areaCode: Int) async {
+    func fetchEateryFromRegion(pageNo: String? = nil, areaCode: Int, categoryCode: String? = nil) async {
         errorMessagee = nil
         isLoading = true
         
         do {
-            let result = try await NetworkManager.shared.getEateryLists(pageNo: pageNo, areaCode: areaCode)
+            let result = try await NetworkManager.shared.getEateryLists(pageNo: pageNo, areaCode: areaCode, cat3: categoryCode)
             
             self.eateryFromRegion.append(contentsOf: result)
             //print("✅ RegionViewModel: \(result.count)개 지역코드 내 음식점 리스트 로딩")

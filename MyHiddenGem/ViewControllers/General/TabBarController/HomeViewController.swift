@@ -49,6 +49,15 @@ class HomeViewController: UIViewController {
     }
     
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        // CategoryCell 내에 라베을 선택한 것을 초기화
+        recommendationCollectionView.indexPathsForSelectedItems?.forEach { recommendationCollectionView.deselectItem(at: $0, animated: false)
+        }
+    }
+    
+    
     // MARK: - Functions
     
     /// recommendationCollectionView UI 셋팅 메서드
@@ -433,6 +442,7 @@ extension HomeViewController: UICollectionViewDelegate {
             
         case .category(let category):
             
+            
             let categoryVC = CategoryViewController(code: category.code, name: category.name)
             navigationController?.pushViewController(categoryVC, animated: true)
             
@@ -445,7 +455,7 @@ extension HomeViewController: UICollectionViewDelegate {
         case .seoul(let seoul):
             print("선택된 서울 음식점: \(seoul.title)")
         case .regionCode(let region):
-            
+
             let regionVC = EateryFromRegionViewController(regionCode: region.code, regionName: region.name)
             navigationController?.pushViewController(regionVC, animated: true)
                     
