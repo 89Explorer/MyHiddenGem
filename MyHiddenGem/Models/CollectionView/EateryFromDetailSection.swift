@@ -11,11 +11,13 @@ import Foundation
 /// contentId와 contentTypeId을 통해 받아온 음식점 데이터를 구분하는 섹션
 enum EateryFromDetailSection: Int, CaseIterable {
     case header
+    case common
     //case eateryInfo
     
     var title: String {
         switch self {
         case .header: return "헤더뷰"
+        case .common: return "공통정보"
         //case .eateryInfo: return "소개"
         }
     }
@@ -25,12 +27,15 @@ enum EateryFromDetailSection: Int, CaseIterable {
 /// contentId와 contentTypeId를 통해 받아온 음석점 데이터를 담는 아이템
 enum EateryFromDetailType: Hashable {
     case header(EateryFromDetailHeader)
+    case common(CommonIntroItem)
     //case eateryInfo(IntroInfoItem)
     
     func hash(into hasher: inout Hasher) {
         switch self {
         case .header(let value):
             hasher.combine(value.contentId)
+        case .common(let value):
+            hasher.combine(value.contentid)
 //        case .eateryInfo(let value):
 //            hasher.combine(value.contentid)
         }
@@ -40,6 +45,8 @@ enum EateryFromDetailType: Hashable {
         switch(lhs, rhs) {
         case (.header(let a), .header(let b)):
             return a.contentId == b.contentId
+        case (.common(let a), .common(let b)):
+            return a.contentid == b.contentid
 //        case (.eateryInfo(let a), .eateryInfo(let b)):
 //            return a.contentid == b.contentid
         default:

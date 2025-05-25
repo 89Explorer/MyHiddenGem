@@ -105,6 +105,7 @@ extension EateryDetailViewController {
         
         activityIndicator.center = view.center
         
+        detailCollectionView.register(DetailCommonCell.self, forCellWithReuseIdentifier: DetailCommonCell.reuseIdentifier)
         detailCollectionView.register(DetailHeaderCell.self, forCellWithReuseIdentifier: DetailHeaderCell.reuseIdentifier)
     }
     
@@ -113,7 +114,7 @@ extension EateryDetailViewController {
         
         var snapshot = NSDiffableDataSourceSnapshot<EateryFromDetailSection, EateryFromDetailType>()
         
-        snapshot.appendSections([.header])
+        snapshot.appendSections([.header, .common])
         
         let headerInfo = EateryFromDetailHeader(
             contentId: headerData!.contentId,
@@ -123,6 +124,8 @@ extension EateryDetailViewController {
             cat3: headerData!.cat3)
         
         snapshot.appendItems([.header(headerInfo)], toSection: .header)
+        snapshot.appendItems(detailViewModel.commonIntro.map { .common($0)}, toSection: .common)
+        
         //snapshot.appendItems(detailViewModel.detailIntro.map { .eateryInfo($0)}, toSection: .eateryInfo)
         
         dataSource?.apply(snapshot, animatingDifferences: true)
@@ -136,6 +139,10 @@ extension EateryDetailViewController {
             case .header(let header):
                 let cell = collectionView.dequeueReusableCell(withReuseIdentifier: DetailHeaderCell.reuseIdentifier, for: indexPath) as? DetailHeaderCell
                 cell?.configure(headerData: header)
+                return cell
+            case .common(let common):
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: DetailCommonCell.reuseIdentifier, for: indexPath) as? DetailCommonCell
+                cell?.configure(with: common)
                 return cell
 //            case .eateryInfo(let info):
 //                return UICollectionViewCell()
@@ -151,7 +158,9 @@ extension EateryDetailViewController {
             
             switch sectionIdentifier {
             case .header:
-                return self.createHeaderSection(using: self.headerData!)
+                return self.createHeaderSection()
+            case .common:
+                return self.createCommonSection(using: self.detailViewModel.commonIntro)
 //            case .eateryInfo:
 //                return self.createHeaderSection(using: self.headerData!)
             }
@@ -164,7 +173,19 @@ extension EateryDetailViewController {
     }
     
     
-    private func createHeaderSection(using section: EateryFromDetailHeader) -> NSCollectionLayoutSection {
+//    private func createHeaderSection(using section: EateryFromDetailHeader) -> NSCollectionLayoutSection {
+//        let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalHeight(1.0))
+//        let item = NSCollectionLayoutItem(layoutSize: itemSize)
+//        
+//        let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .absolute(500))
+//        let group = NSCollectionLayoutGroup.vertical(layoutSize: groupSize, subitems: [item])
+//        
+//        let section = NSCollectionLayoutSection(group: group)
+//        section.interGroupSpacing = 8
+//        return section
+//    }
+    
+    private func createHeaderSection() -> NSCollectionLayoutSection {
         let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalHeight(1.0))
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
         
@@ -175,6 +196,21 @@ extension EateryDetailViewController {
         section.interGroupSpacing = 8
         return section
     }
+    
+    
+    private func createCommonSection(using section: [CommonIntroItem]) -> NSCollectionLayoutSection {
+        let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(40.0))
+        let item = NSCollectionLayoutItem(layoutSize: itemSize)
+        
+        let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(40.0))
+        let group = NSCollectionLayoutGroup.vertical(layoutSize: groupSize, subitems: [item])
+        
+        let section = NSCollectionLayoutSection(group: group)
+        section.interGroupSpacing = 8
+        return section
+    }
+    
+    
     
     
 }
@@ -188,8 +224,10 @@ extension EateryDetailViewController {
         
         Task {
             async let eateryInfo: () = detailViewModel.fetchDetailInfo(contentId: contentId, contentType: contentType)
+            async let detailInfo: () = detailViewModel.fetchCommonIntroInfo(contentId: contentId)
             
             await eateryInfo
+            await detailInfo
         }
     }
     
@@ -197,6 +235,7 @@ extension EateryDetailViewController {
     private func bindViewModel() {
         
         detailViewModel.$detailIntro
+            .combineLatest(detailViewModel.$detailIntro)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 self?.reloadData()

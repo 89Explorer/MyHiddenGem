@@ -233,6 +233,51 @@ class NetworkManager {
             throw error
         }
     }
+    
+    
+    /// 음식점 공통 정보에 대한 데이터를 가져오는 메서드 
+    func getEateryCommonInfo(contentId: String) async throws ->[CommonIntroItem] {
+        
+        var components = URLComponents(string: "\(Constants.latestbaseURLString)/detailCommon2")
+        
+        let queryItems: [URLQueryItem] = [
+            URLQueryItem(name: "serviceKey", value: Constants.api_key),
+            URLQueryItem(name: "MobileOS", value: "ETC"),
+            URLQueryItem(name: "MobileApp", value: "AppTest"),
+            URLQueryItem(name: "_type", value: "json"),
+            URLQueryItem(name: "contentId", value: contentId),
+            URLQueryItem(name: "numOfRows", value: "10"),
+            URLQueryItem(name: "pageNo", value: "1")
+        ]
+        
+        components?.queryItems = queryItems
+        
+        if let encodedQuery = components?.percentEncodedQuery?.replacingOccurrences(of: "%25", with: "%") {
+            components?.percentEncodedQuery = encodedQuery
+        }
+        
+        guard let url = components?.url else {
+            print("❌ URL 생성 실패: \(String(describing: components?.string))")
+            throw URLError(.badURL)
+        }
+        
+        do {
+            let (data, response) = try await URLSession.shared.data(from: url)
+            
+            if let httpResponse = response as? HTTPURLResponse {
+                print("📦 Common Info 상태 코드: \(httpResponse.statusCode)")
+            }
+            
+            let decoded = try JSONDecoder().decode(CommonWelcome.self, from: data)
+            return decoded.response.body.items.item
+        } catch let decodingError as DecodingError {
+            print("❌ Common Info 디코딩 오류: \(decodingError)")
+            throw decodingError
+        } catch {
+            print("❌ Common Info 네트워크 요청 오류: \(error.localizedDescription)")
+            throw error
+        }
+    }
 }
 
 
