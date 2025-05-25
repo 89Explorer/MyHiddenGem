@@ -17,6 +17,7 @@ class HomeViewController: UIViewController {
     private let regionCodeViewModel: RegionViewModel = RegionViewModel()
     private var loadingViewModel: LoadingViewModel!
     
+    
     private var cancellables: Set<AnyCancellable> = []
     
     private var dataSource: UICollectionViewDiffableDataSource<EaterySection, EateryItemType>?
@@ -46,6 +47,7 @@ class HomeViewController: UIViewController {
         createDataSource()
         
         recommendationCollectionView.delegate = self
+        
     }
     
     
@@ -112,7 +114,9 @@ class HomeViewController: UIViewController {
                 
             case .category(let category):
                 let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CategoryCell.reuseIdentifier, for: indexPath) as? CategoryCell
+                
                 let emojiCategory = "\(category.icon) \(category.name)"
+                
                 cell?.configure(with: emojiCategory)
                 return cell
                 
@@ -448,6 +452,13 @@ extension HomeViewController: UICollectionViewDelegate {
             
         case .eatery(let eatery):
             print("선택된 음식점: \(eatery.title)")
+            
+            let detailHeader: EateryFromDetailHeader = EateryFromDetailHeader(contentId: eatery.contentid, contentType: eatery.contenttypeid, eateryTitle: eatery.title, posterPath: eatery.firstimage, cat3: eatery.cat3 )
+            
+            let detailVC = EateryDetailViewController(with: detailHeader)
+            navigationController?.pushViewController(detailVC, animated: true)
+            
+            
         case .gyeonggido(let gyeonggido):
             print("선택된 경기도 음식점: \(gyeonggido.title)")
         case .incheon(let incheon):

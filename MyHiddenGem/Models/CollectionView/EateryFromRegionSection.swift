@@ -22,6 +22,7 @@ enum EateryFromRegionSection: Int, CaseIterable {
 }
 
 
+
 /// 지역코드를 통해 받아온 음식점 데이터를 담는 아이템
 enum EateryFromRegionType: Hashable {
     case category(CategoryEmogi)

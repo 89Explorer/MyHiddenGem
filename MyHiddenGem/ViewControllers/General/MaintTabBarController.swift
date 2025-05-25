@@ -29,8 +29,8 @@ extension MaintTabBarController {
         let addFeedVC = UINavigationController(rootViewController: AddFeedViewController())
         let noteVC = UINavigationController(rootViewController: NoteViewController())
         
-        homeVC.tabBarItem.image = UIImage(systemName: "house")
-        homeVC.tabBarItem.selectedImage = UIImage(systemName: "house.fill")
+        homeVC.tabBarItem.image = UIImage(systemName: "house.circle")
+        homeVC.tabBarItem.selectedImage = UIImage(systemName: "house.circle.fill")
         
         locationVC.tabBarItem.image = UIImage(systemName: "mappin.and.ellipse.circle")
         locationVC.tabBarItem.selectedImage = UIImage(systemName: "mappin.and.ellipse.circle.fill")
@@ -38,7 +38,8 @@ extension MaintTabBarController {
         addFeedVC.tabBarItem.image = UIImage(systemName: "plus.circle")
         addFeedVC.tabBarItem.selectedImage = UIImage(systemName: "plus.circle.fill")
         
-        noteVC.tabBarItem.image = UIImage(systemName: "note.text")
+        noteVC.tabBarItem.image = UIImage(systemName: "document.circle")
+        noteVC.tabBarItem.selectedImage = UIImage(systemName: "document.circle.fill")
         
         tabBar.tintColor = .label
         tabBar.backgroundColor = .systemBackground

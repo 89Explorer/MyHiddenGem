@@ -25,6 +25,7 @@ class CategoryViewController: UIViewController {
     
     // MARK: - UI Component
     private var eateryCollectionView: UICollectionView!
+    private let activityIndicator = UIActivityIndicatorView(style: .large)
     
     
     // MARK: - init
@@ -51,6 +52,7 @@ class CategoryViewController: UIViewController {
         setupNavigationBar()
         fetchEateryFromCategory()
         bindViewModel()
+        bindLoading()
         
         setupCollectionView()
         createDataSource()
@@ -122,8 +124,12 @@ extension CategoryViewController {
         eateryCollectionView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         eateryCollectionView.backgroundColor = .systemBackground
         eateryCollectionView.showsHorizontalScrollIndicator = false
+        eateryCollectionView.showsLargeContentViewer = false
         
         view.addSubview(eateryCollectionView)
+        view.addSubview(activityIndicator)
+        
+        activityIndicator.center = view.center
         
         eateryCollectionView.register(EateryFromCategoryCell.self, forCellWithReuseIdentifier: EateryFromCategoryCell.reuseIdentifier)
         
@@ -151,6 +157,21 @@ extension CategoryViewController {
             }
         }
     }
+    
+    
+    private func bindLoading() {
+        categoriesViewModel.$isLoading
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isLoading in
+                if isLoading {
+                    self?.activityIndicator.startAnimating()
+                } else {
+                    self?.activityIndicator.stopAnimating()
+                }
+            }
+            .store(in: &cancellables)
+    }
+    
     
     
     private func createCompostionalLayout() -> UICollectionViewLayout {

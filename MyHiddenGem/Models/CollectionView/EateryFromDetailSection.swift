@@ -1,0 +1,62 @@
+//
+//  EateryFromDetailSection.swift
+//  MyHiddenGem
+//
+//  Created by 권정근 on 5/25/25.
+//
+
+import Foundation
+
+
+/// contentId와 contentTypeId을 통해 받아온 음식점 데이터를 구분하는 섹션
+enum EateryFromDetailSection: Int, CaseIterable {
+    case header
+    //case eateryInfo
+    
+    var title: String {
+        switch self {
+        case .header: return "헤더뷰"
+        //case .eateryInfo: return "소개"
+        }
+    }
+}
+
+
+/// contentId와 contentTypeId를 통해 받아온 음석점 데이터를 담는 아이템
+enum EateryFromDetailType: Hashable {
+    case header(EateryFromDetailHeader)
+    //case eateryInfo(IntroInfoItem)
+    
+    func hash(into hasher: inout Hasher) {
+        switch self {
+        case .header(let value):
+            hasher.combine(value.contentId)
+//        case .eateryInfo(let value):
+//            hasher.combine(value.contentid)
+        }
+    }
+    
+    static func == (lhs: EateryFromDetailType, rhs: EateryFromDetailType) -> Bool {
+        switch(lhs, rhs) {
+        case (.header(let a), .header(let b)):
+            return a.contentId == b.contentId
+//        case (.eateryInfo(let a), .eateryInfo(let b)):
+//            return a.contentid == b.contentid
+        default:
+            return false
+        }
+    }
+}
+
+
+
+/// 헤더뷰 부분 아이템
+struct EateryFromDetailHeader: Hashable {
+    
+    let contentId: String
+    let contentType: String
+    let eateryTitle: String
+    let posterPath: String
+    let cat3: String
+    
+}

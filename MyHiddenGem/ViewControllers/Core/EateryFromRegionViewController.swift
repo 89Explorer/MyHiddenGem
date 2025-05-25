@@ -61,16 +61,7 @@ class EateryFromRegionViewController: UIViewController {
         createDataSource()
         
         eateryCollectionView.delegate = self
-        //regionViewModel.clearEateryData()
-        
-        //        regionViewModel.$eateryFromRegion
-        //            .combineLatest(categoryViewModel.$emojiCategories)
-        //            .sink { [weak self] items in
-        //                self?.reloadData()
-        //            }
-        //            .store(in: &cancellables)
-        
-        
+
     }
 }
 
@@ -129,36 +120,6 @@ extension EateryFromRegionViewController {
             }
             .store(in: &cancellables)
     }
-    
-    
-    private func reloadCategorySectionOnly() {
-        guard let dataSource = dataSource else { return }
-        var snapshot = dataSource.snapshot()
-        
-        let oldItems = snapshot.itemIdentifiers(inSection: .category)
-        snapshot.deleteItems(oldItems)
-        
-        let newItems = categoryViewModel.emojiCategories.map { EateryFromRegionType.category($0) }
-        snapshot.appendItems(newItems, toSection: .category)
-        
-        dataSource.apply(snapshot, animatingDifferences: true)
-    }
-    
-    
-    
-    private func reloadRegionSectionOnly() {
-        guard let dataSource = dataSource else { return }
-        var snapshot = dataSource.snapshot()
-        
-        let oldItems = snapshot.itemIdentifiers(inSection: .region)
-        snapshot.deleteItems(oldItems)
-        
-        let newItems = regionViewModel.eateryFromRegion.map { EateryFromRegionType.region($0) }
-        snapshot.appendItems(newItems, toSection: .region)
-        
-        dataSource.apply(snapshot, animatingDifferences: true)
-    }
-    
     
     /// 데이터 로딩 중에는 인디게이터를 보여주는 메서드
     private func bindLoading() {

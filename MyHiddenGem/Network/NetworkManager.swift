@@ -186,6 +186,53 @@ class NetworkManager {
             throw error
         }
     }
+    
+    
+    /// 음식점의 Intro 소개 정보를 받아오는 메서드
+    func getEateryIntroInfo(contentId: String, contentTypeId: String) async throws ->[IntroInfoItem] {
+        
+        var components = URLComponents(string: "\(Constants.latestbaseURLString)/detailIntro2")
+        
+        let queryItems: [URLQueryItem] = [
+            URLQueryItem(name: "serviceKey", value: Constants.api_key),
+            URLQueryItem(name: "MobileOS", value: "ETC"),
+            URLQueryItem(name: "MobileApp", value: "AppTest"),
+            URLQueryItem(name: "_type", value: "json"),
+            URLQueryItem(name: "contentId", value: contentId),
+            URLQueryItem(name: "contentTypeId", value: contentTypeId),
+            URLQueryItem(name: "numOfRows", value: "10"),
+            URLQueryItem(name: "pageNo", value: "1")
+        ]
+        
+        components?.queryItems = queryItems
+        
+        // API 특이 대응: 인코딩 후 이중 % 제거
+        if let encodedQuery = components?.percentEncodedQuery?.replacingOccurrences(of: "%25", with: "%") {
+            components?.percentEncodedQuery = encodedQuery
+        }
+        
+        guard let url = components?.url else {
+            print("❌ URL 생성 실패: \(String(describing: components?.string))")
+            throw URLError(.badURL)
+        }
+        
+        do {
+            let (data, response) = try await URLSession.shared.data(from: url)
+            
+            if let httpResponse = response as? HTTPURLResponse {
+                print("💁 Intro Info 상태 코드: \(httpResponse.statusCode)")
+            }
+            
+            let decoded = try JSONDecoder().decode(IntroInfoWelcome.self, from: data)
+            return decoded.response.body.items.item
+        } catch let decodingError as DecodingError {
+            print("❌ Intro Info 디코딩 오류: \(decodingError)")
+            throw decodingError
+        } catch {
+            print("❌ Intro Info 네크워크 요청 오류: \(error.localizedDescription)")
+            throw error
+        }
+    }
 }
 
 

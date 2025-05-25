@@ -59,8 +59,24 @@ struct CategoryCodeMapper {
         "A05021000": "클럽"
     ]
     
+    static let emojiMap: [String: String] = [
+        "한식": "🍚",
+        "서양식": "🥩",
+        "일식": "🍣",
+        "중식": "🍜",
+        "이색음식점": "🍤",
+        "카페/전통찻집": "☕️"
+        // "클럽": "🎧" // 필요시 추가
+    ]
     
     static func name(for code: String) -> String {
         return codeMap[code] ?? "기타 "
+    }
+    
+    /// 이모지 + 한글 조합된 문자열 반환 ("🍚 한식")
+    static func emojiName(for code: String) -> String {
+        let name = name(for: code)
+        let emoji = emojiMap[name] ?? "🍽️"  // 기본 이모지
+        return "\(emoji) \(name)"
     }
 }
