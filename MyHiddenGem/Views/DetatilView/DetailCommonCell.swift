@@ -14,51 +14,70 @@ class DetailCommonCell: UICollectionViewCell {
     
     static let reuseIdentifier: String = "DetailCommonCell"
     
+    
+    // MARK: - UI Component
+
+    private let addressView: TitleValueView = TitleValueView()
+    private let overviewView: TitleValueView = TitleValueView()
+    private let mainStackView: UIStackView = UIStackView()
+    
+    
     // MARK: - Init
     
     override init(frame: CGRect) {
         super.init(frame: frame)
         contentView.backgroundColor = .systemGray6
-        contentView.layer.cornerRadius = 8
-        contentView.clipsToBounds = true
+        
+        setupUI()
         
     }
+    
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        addressView.configure(title: nil, value: nil)
+        overviewView.configure(title: nil, value: nil)
+        
+    }
+    
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func configure(with eatery: CommonIntroItem) {
-       
-        let stackView: UIStackView = UIStackView()
-        stackView.axis = .vertical
-        stackView.spacing = 10
-        stackView.translatesAutoresizingMaskIntoConstraints = false
+
+    
+    private func setupUI() {
+        
+        mainStackView.axis = .vertical
+        mainStackView.spacing = 12
+        mainStackView.alignment = .fill
+        
+        [addressView, overviewView].forEach {
+            mainStackView.addArrangedSubview($0)
+        }
         
         
-        let overviewView: InfoRowView = InfoRowView(
-            title: "소개",
-            image: "info.square",
-            value: eatery.overview)
-        
-        let addressView: InfoRowView = InfoRowView(
-            title: "주소",
-            image: "mappin.square",
-            value: eatery.addr1)
-        
-        stackView.addArrangedSubview(overviewView)
-        stackView.addArrangedSubview(addressView)
-        
-        contentView.addSubview(stackView)
+        mainStackView.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(mainStackView)
         
         NSLayoutConstraint.activate([
             
-            stackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 10),
-            stackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -10),
-            stackView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 10),
-            stackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -10)
+            mainStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            mainStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            mainStackView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 10),
+            mainStackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -10)
             
         ])
     }
-    
+
+
+    func configure(with item: CommonIntroItem) {
+        
+        let addressValue = item.addr1
+        let overviewValue = item.overview
+        
+        addressView.configure(title: "주소", value: addressValue)
+        overviewView.configure(title: "소개", value: overviewValue)
+    }
 }

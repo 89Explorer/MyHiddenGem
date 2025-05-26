@@ -41,7 +41,7 @@ class DetailHeaderCell: UICollectionViewCell {
         imageView.clipsToBounds = true
         imageView.setContentHuggingPriority(.defaultHigh, for: .vertical)
         
-        introLabel.font = UIFont.preferredFont(forTextStyle: .extraLargeTitle)
+        introLabel.font = UIFont.preferredFont(forTextStyle: .title1)
         introLabel.backgroundColor = .systemGray6
         introLabel.textColor = .label
         introLabel.layer.cornerRadius = 8

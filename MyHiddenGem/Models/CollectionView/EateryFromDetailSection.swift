@@ -12,12 +12,14 @@ import Foundation
 enum EateryFromDetailSection: Int, CaseIterable {
     case header
     case common
+    case detailImage
     //case eateryInfo
     
     var title: String {
         switch self {
         case .header: return "헤더뷰"
         case .common: return "공통정보"
+        case .detailImage: return "상세 이미지"
         //case .eateryInfo: return "소개"
         }
     }
@@ -28,6 +30,7 @@ enum EateryFromDetailSection: Int, CaseIterable {
 enum EateryFromDetailType: Hashable {
     case header(EateryFromDetailHeader)
     case common(CommonIntroItem)
+    case detailImage(DetailImageItem)
     //case eateryInfo(IntroInfoItem)
     
     func hash(into hasher: inout Hasher) {
@@ -36,6 +39,8 @@ enum EateryFromDetailType: Hashable {
             hasher.combine(value.contentId)
         case .common(let value):
             hasher.combine(value.contentid)
+        case .detailImage(let value):
+            hasher.combine(value.originimgurl)
 //        case .eateryInfo(let value):
 //            hasher.combine(value.contentid)
         }
@@ -47,6 +52,8 @@ enum EateryFromDetailType: Hashable {
             return a.contentId == b.contentId
         case (.common(let a), .common(let b)):
             return a.contentid == b.contentid
+        case (.detailImage(let a), .detailImage(let b)):
+            return a.originimgurl == b.originimgurl
 //        case (.eateryInfo(let a), .eateryInfo(let b)):
 //            return a.contentid == b.contentid
         default:

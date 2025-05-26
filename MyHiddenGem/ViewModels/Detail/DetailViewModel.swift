@@ -15,6 +15,7 @@ class DetailViewModel: ObservableObject {
     @Published var detailIntro: [IntroInfoItem] = []
     
     @Published var commonIntro: [CommonIntroItem] = []
+    @Published var detailImageList: [DetailImageItem] = []
     
     @Published var isLoading: Bool = false
     @Published var errorMessage: String? = nil
@@ -31,7 +32,7 @@ class DetailViewModel: ObservableObject {
         do {
             let result = try await NetworkManager.shared.getEateryIntroInfo(contentId: contentId, contentTypeId: contentType)
             self.detailIntro = result
-            print("✅ DetailInfo: \(result)")
+            //print("✅ DetailInfo: \(result)")
         } catch {
             self.errorMessage = error.localizedDescription
             print("❌ DetailViewModel: 에러 \(error.localizedDescription)")
@@ -49,7 +50,7 @@ class DetailViewModel: ObservableObject {
         do {
             let result = try await NetworkManager.shared.getEateryCommonInfo(contentId: contentId)
             self.commonIntro = result
-            print("✅ DetailCommonInfo: \(result)")
+            //print("✅ DetailCommonInfo: \(result)")
         } catch {
             self.errorMessage = error.localizedDescription
             print("❌ DetailViewModel: 에러 \(error.localizedDescription)")
@@ -57,4 +58,23 @@ class DetailViewModel: ObservableObject {
         
         isLoading = false
     }
+    
+    
+    /// 이미지 리스트를 가져오는 메서드
+    func fetchDetailImageList(contentId: String) async {
+        isLoading = true
+        errorMessage = nil
+        
+        do {
+            let result = try await NetworkManager.shared.getEateryDetailImage(contentId: contentId)
+            self.detailImageList = result
+            //print("✅ DetailImageList: \(result)")
+        } catch {
+            self.errorMessage = error.localizedDescription
+            print("❌ DetailImageList: 에러 \(error.localizedDescription)")
+        }
+        
+        isLoading = false
+    }
+    
 }

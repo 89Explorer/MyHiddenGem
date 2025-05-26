@@ -235,7 +235,7 @@ class NetworkManager {
     }
     
     
-    /// 음식점 공통 정보에 대한 데이터를 가져오는 메서드 
+    /// 음식점 공통 정보에 대한 데이터를 가져오는 메서드
     func getEateryCommonInfo(contentId: String) async throws ->[CommonIntroItem] {
         
         var components = URLComponents(string: "\(Constants.latestbaseURLString)/detailCommon2")
@@ -278,6 +278,53 @@ class NetworkManager {
             throw error
         }
     }
+    
+    
+    
+    func getEateryDetailImage(contentId: String) async throws -> [DetailImageItem] {
+        
+        var components = URLComponents(string: "\(Constants.latestbaseURLString)/detailImage2")
+        
+        let queryItems: [URLQueryItem] = [
+            URLQueryItem(name: "serviceKey", value: Constants.api_key),
+            URLQueryItem(name: "MobileOS", value: "ETC"),
+            URLQueryItem(name: "MobileApp", value: "AppTest"),
+            URLQueryItem(name: "_type", value: "json"),
+            URLQueryItem(name: "contentId", value: contentId),
+            URLQueryItem(name: "imageYN", value: "Y"),
+            URLQueryItem(name: "numOfRows", value: "10"),
+            URLQueryItem(name: "pageNo", value: "1")
+        ]
+        
+        components?.queryItems = queryItems
+        
+        // ✅ Encoding 처리 보정
+        if let encodedQuery = components?.percentEncodedQuery?.replacingOccurrences(of: "%25", with: "%") {
+            components?.percentEncodedQuery = encodedQuery
+        }
+        
+        guard let url = components?.url else {
+            print("❌ URL 생성 실패: \(String(describing: components?.string))")
+            throw URLError(.badURL)
+        }
+        
+        do {
+            let (data, response) = try await URLSession.shared.data(from: url)
+            
+            if let httpResponse = response as? HTTPURLResponse {
+                print("📸 Image Info 상태 코드: \(httpResponse.statusCode)")
+            }
+            
+            let decoded = try JSONDecoder().decode(DetailImageWelcome.self, from: data)
+            return decoded.response.body.items.item
+        } catch let decodingError as DecodingError {
+            print("❌ Image Info 디코딩 오류: \(decodingError)")
+            throw decodingError
+        } catch {
+            print("❌ Image Info 네트워크 요청 오류: \(error.localizedDescription)")
+            throw error        }
+    }
+    
 }
 
 
