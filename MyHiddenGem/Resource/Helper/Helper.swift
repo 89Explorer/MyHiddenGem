@@ -117,7 +117,8 @@ final class TitleValueView: UIView {
         let stackView = UIStackView(arrangedSubviews: [titleLabel, valueLabel])
         stackView.axis = .vertical
         stackView.spacing = 8
-        stackView.alignment = .leading
+        stackView.alignment = .fill
+        //stackView.distribution = .fill
         
         addSubview(stackView)
         stackView.translatesAutoresizingMaskIntoConstraints = false

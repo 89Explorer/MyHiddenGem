@@ -100,10 +100,7 @@ extension EateryDetailViewController {
 // MARK: - Extension: CollectionView 설정
 
 extension EateryDetailViewController {
-    
-   
-    
-    
+        
     private func setupCollectionView() {
         
         detailCollectionView = UICollectionView(frame: view.bounds, collectionViewLayout: createCompositionalLayout())
@@ -111,6 +108,7 @@ extension EateryDetailViewController {
         detailCollectionView.backgroundColor = .systemGray6
         detailCollectionView.showsVerticalScrollIndicator = false
         detailCollectionView.showsHorizontalScrollIndicator = false
+        detailCollectionView.isUserInteractionEnabled = true
         
         view.addSubview(detailCollectionView)
         view.addSubview(activityIndicator)
@@ -163,7 +161,7 @@ extension EateryDetailViewController {
                 let cell = collectionView.dequeueReusableCell(withReuseIdentifier: DetailCommonCell.reuseIdentifier, for: indexPath) as? DetailCommonCell
                 
                 let convertItems = self.makeCommonInfoData(item: common)
-                
+                cell?.delegate = self
                 cell?.configure(with: convertItems)
                 return cell
                 
@@ -177,9 +175,9 @@ extension EateryDetailViewController {
                 
                 let convertItems = self.makeIntroInfoData(item: info)
                 cell?.configure(with: convertItems)
+                
                 return cell
-//            case .eateryInfo(let info):
-//                return UICollectionViewCell()
+
             }
         }
     }
@@ -194,18 +192,20 @@ extension EateryDetailViewController {
         ]
     }
     
-    
-    
-    
     /// IntroInfoItem 타입의 데이터를 [(String, String?] 타입으로 변환
     private func makeIntroInfoData(item: IntroInfoItem) -> [(String, String?)] {
         
         let firstMenu = item.firstmenu?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        let treatmenu = item.treatmenu?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let treatMenu = item.treatmenu?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         
-        let totalMenu = [firstMenu, treatmenu]
+        
+        let cleanedFirstMenu = firstMenu.replacingOccurrences(of: "\\s*[/,]+\\s*", with: ", ", options: .regularExpression)
+        let cleanedTreatMenu = treatMenu
+                .replacingOccurrences(of: "\\s*[/,]+\\s*", with: ", ", options: .regularExpression)
+        
+        let totalMenu = [cleanedFirstMenu, cleanedTreatMenu]
             .filter { !$0.isEmpty }
-            .joined(separator: ",")
+            .joined(separator: ", ")
         
         let finalValue = totalMenu.isEmpty ? nil : totalMenu
         
@@ -216,8 +216,6 @@ extension EateryDetailViewController {
             ("전화번호", item.infocenterfood)
         ]
     }
-    
-    
     
     private func createCompositionalLayout() -> UICollectionViewLayout {
         let layout = UICollectionViewCompositionalLayout {
@@ -355,5 +353,23 @@ extension EateryDetailViewController {
                 }
             }
             .store(in: &cancellables)
+    }
+}
+
+
+// MARK: - Extension: 델리게이트 패턴을 사용해 "소개" 더보기 기능
+
+extension EateryDetailViewController: DetailCommonCellDelegate {
+    
+//    func didTapIntroText(_ text: String?) {
+//        print("더보기 기능 활성화")
+//        let alert = UIAlertController(title: "소개", message: text, preferredStyle: .alert)
+//        alert.addAction(UIAlertAction(title: "확인", style: .default))
+//        present(alert, animated: true)
+//    }
+    
+    func didTapIntroText(_ text: String?) {
+        let vc = IntroSheetViewController(text: text!)
+        present(vc, animated: true)
     }
 }

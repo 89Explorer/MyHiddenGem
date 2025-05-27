@@ -14,12 +14,15 @@ class DetailCommonCell: UICollectionViewCell {
     
     static let reuseIdentifier: String = "DetailCommonCell"
     
+    weak var delegate: DetailCommonCellDelegate?
+    
     
     // MARK: - UI Component
 
 //    private let addressView: TitleValueView = TitleValueView()
 //    private let overviewView: TitleValueView = TitleValueView()
     private let mainStackView: UIStackView = UIStackView()
+    private var introText: String?
     
     
     // MARK: - Init
@@ -44,7 +47,6 @@ class DetailCommonCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
-
     
 //    private func setupUI() {
 //        
@@ -106,7 +108,29 @@ class DetailCommonCell: UICollectionViewCell {
             let view = TitleValueView()
             view.configure(title: item.title, value: item.value)
             mainStackView.addArrangedSubview(view)
+            
+            
+            if item.title == "소개" {
+                introText = item.value
+                view.isUserInteractionEnabled = true
+                let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleIntroTap))
+                view.addGestureRecognizer(tapGesture)
+            }
         }
-        
+    }
+    
+    
+    ///
+    @objc private func handleIntroTap() {
+        delegate?.didTapIntroText(introText)
     }
 }
+
+
+
+// MARK: - Protocol: 소개 부분을 탭하면 더 보기 기능 활성화
+protocol DetailCommonCellDelegate: AnyObject {
+    func didTapIntroText(_ text: String?)
+}
+
+
