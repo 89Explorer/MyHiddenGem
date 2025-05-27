@@ -17,7 +17,11 @@ class DetailViewModel: ObservableObject {
     @Published var commonIntro: [CommonIntroItem] = []
     @Published var detailImageList: [DetailImageItem] = []
     
-    @Published var isLoading: Bool = false
+    @Published var isIntroLoading: Bool = true
+    @Published var isCommonLoading: Bool = true
+    @Published var isImageLoading: Bool = true
+    
+    //@Published var isLoading: Bool = true
     @Published var errorMessage: String? = nil
     
     private var cancellable: Set<AnyCancellable> = []
@@ -26,25 +30,25 @@ class DetailViewModel: ObservableObject {
     
     // MARK: - Function
     func fetchDetailInfo(contentId: String, contentType: String) async {
-        isLoading = true
+        isIntroLoading = true
         errorMessage = nil
         
         do {
             let result = try await NetworkManager.shared.getEateryIntroInfo(contentId: contentId, contentTypeId: contentType)
             self.detailIntro = result
-            //print("✅ DetailInfo: \(result)")
+            print("✅ DetailInfo: \(result)")
         } catch {
             self.errorMessage = error.localizedDescription
             print("❌ DetailViewModel: 에러 \(error.localizedDescription)")
         }
         
-        isLoading = false
+        isIntroLoading = false
     }
     
     
     /// contentId를 통해 음식점에 대한 공통된 데이터를 가져오는 메서드
     func fetchCommonIntroInfo(contentId: String) async {
-        isLoading = true
+        isCommonLoading = true
         errorMessage = nil
         
         do {
@@ -56,13 +60,13 @@ class DetailViewModel: ObservableObject {
             print("❌ DetailViewModel: 에러 \(error.localizedDescription)")
         }
         
-        isLoading = false
+        isCommonLoading = false
     }
     
     
     /// 이미지 리스트를 가져오는 메서드
     func fetchDetailImageList(contentId: String) async {
-        isLoading = true
+        isImageLoading = true
         errorMessage = nil
         
         do {
@@ -74,7 +78,14 @@ class DetailViewModel: ObservableObject {
             print("❌ DetailImageList: 에러 \(error.localizedDescription)")
         }
         
-        isLoading = false
+        isImageLoading = false
+    }
+    
+    
+    func clearDetailData() {
+        self.detailIntro = []
+        self.commonIntro = []
+        self.detailImageList = []
     }
     
 }

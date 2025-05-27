@@ -280,7 +280,7 @@ class NetworkManager {
     }
     
     
-    
+    /// 음식점의 상세 이미지 정보를 가져오는 메서드
     func getEateryDetailImage(contentId: String) async throws -> [DetailImageItem] {
         
         var components = URLComponents(string: "\(Constants.latestbaseURLString)/detailImage2")

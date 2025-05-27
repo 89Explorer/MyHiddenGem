@@ -17,8 +17,8 @@ class DetailCommonCell: UICollectionViewCell {
     
     // MARK: - UI Component
 
-    private let addressView: TitleValueView = TitleValueView()
-    private let overviewView: TitleValueView = TitleValueView()
+//    private let addressView: TitleValueView = TitleValueView()
+//    private let overviewView: TitleValueView = TitleValueView()
     private let mainStackView: UIStackView = UIStackView()
     
     
@@ -35,8 +35,7 @@ class DetailCommonCell: UICollectionViewCell {
     
     override func prepareForReuse() {
         super.prepareForReuse()
-        addressView.configure(title: nil, value: nil)
-        overviewView.configure(title: nil, value: nil)
+        mainStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
         
     }
     
@@ -47,17 +46,36 @@ class DetailCommonCell: UICollectionViewCell {
     
 
     
+//    private func setupUI() {
+//        
+//        mainStackView.axis = .vertical
+//        mainStackView.spacing = 12
+//        mainStackView.alignment = .fill
+//        
+//        [addressView, overviewView].forEach {
+//            mainStackView.addArrangedSubview($0)
+//        }
+//        
+//        
+//        mainStackView.translatesAutoresizingMaskIntoConstraints = false
+//        contentView.addSubview(mainStackView)
+//        
+//        NSLayoutConstraint.activate([
+//            
+//            mainStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+//            mainStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+//            mainStackView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 10),
+//            mainStackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -10)
+//            
+//        ])
+//    }
+
+    
     private func setupUI() {
         
         mainStackView.axis = .vertical
-        mainStackView.spacing = 12
+        mainStackView.spacing = 8
         mainStackView.alignment = .fill
-        
-        [addressView, overviewView].forEach {
-            mainStackView.addArrangedSubview($0)
-        }
-        
-        
         mainStackView.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(mainStackView)
         
@@ -70,14 +88,25 @@ class DetailCommonCell: UICollectionViewCell {
             
         ])
     }
+    
 
-
-    func configure(with item: CommonIntroItem) {
+//    func configure(with item: CommonIntroItem) {
+//        
+//        let addressValue = item.addr1
+//        let overviewValue = item.overview
+//        
+//        addressView.configure(title: "주소", value: addressValue)
+//        overviewView.configure(title: "소개", value: overviewValue)
+//    }
+    
+    func configure(with items: [(title: String, value: String?)]) {
+        mainStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
         
-        let addressValue = item.addr1
-        let overviewValue = item.overview
+        for item in items {
+            let view = TitleValueView()
+            view.configure(title: item.title, value: item.value)
+            mainStackView.addArrangedSubview(view)
+        }
         
-        addressView.configure(title: "주소", value: addressValue)
-        overviewView.configure(title: "소개", value: overviewValue)
     }
 }

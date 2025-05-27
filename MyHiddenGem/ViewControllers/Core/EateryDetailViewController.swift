@@ -16,11 +16,17 @@ class EateryDetailViewController: UIViewController {
     
     private var headerData: EateryFromDetailHeader?
     
-    
     private var detailViewModel: DetailViewModel = DetailViewModel()
+    private var detailLoadingViewModel: DetailLoadingViewModel!
+    
     private var dataSource: UICollectionViewDiffableDataSource<EateryFromDetailSection, EateryFromDetailType>?
     
     private var cancellables: Set<AnyCancellable> = []
+    
+    
+    /// Cell을 공용으로 사용할 목적으로 데이터 타입 변환
+    private let commonInfoData: [(String, String?)] = []
+    private let IntroInfoData: [(String, String?)] = []
     
     // MARK: - UI Component
     
@@ -48,12 +54,23 @@ class EateryDetailViewController: UIViewController {
         view.backgroundColor = .systemBackground
         
         setupNavigationBar()
-        setupCollectionView()
-        createDataSource()
+        
+        bindLoading()
+       
         //self.navigationController?.navigationBar.isHidden = true;
+        
         bindViewModel()
         fetchEateryDetailIntroInfo(contentId: headerData!.contentId, contentType: headerData!.contentType)
+        setupCollectionView()
+        createDataSource()
         
+    }
+    
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        detailViewModel.clearDetailData()
     }
 }
 
@@ -84,6 +101,8 @@ extension EateryDetailViewController {
 
 extension EateryDetailViewController {
     
+   
+    
     
     private func setupCollectionView() {
         
@@ -113,7 +132,7 @@ extension EateryDetailViewController {
         
         var snapshot = NSDiffableDataSourceSnapshot<EateryFromDetailSection, EateryFromDetailType>()
         
-        snapshot.appendSections([.header, .common, .detailImage])
+        snapshot.appendSections([.header, .common, .detailImage, .eateryInfo])
         
         let headerInfo = EateryFromDetailHeader(
             contentId: headerData!.contentId,
@@ -126,7 +145,7 @@ extension EateryDetailViewController {
         snapshot.appendItems(detailViewModel.commonIntro.map { .common($0)}, toSection: .common)
         snapshot.appendItems(detailViewModel.detailImageList.map { .detailImage($0)}, toSection: .detailImage)
         
-        //snapshot.appendItems(detailViewModel.detailIntro.map { .eateryInfo($0)}, toSection: .eateryInfo)
+        snapshot.appendItems(detailViewModel.detailIntro.map { .eateryInfo($0)}, toSection: .eateryInfo)
         
         dataSource.apply(snapshot, animatingDifferences: true)
         
@@ -142,18 +161,62 @@ extension EateryDetailViewController {
                 return cell
             case .common(let common):
                 let cell = collectionView.dequeueReusableCell(withReuseIdentifier: DetailCommonCell.reuseIdentifier, for: indexPath) as? DetailCommonCell
-                cell?.configure(with: common)
+                
+                let convertItems = self.makeCommonInfoData(item: common)
+                
+                cell?.configure(with: convertItems)
                 return cell
                 
             case .detailImage(let detailImage):
                 let cell = collectionView.dequeueReusableCell(withReuseIdentifier: DetailImageCell.reuseIdentifier, for: indexPath) as? DetailImageCell
                 cell?.configure(with: detailImage)
                 return cell
+                
+            case .eateryInfo(let info):
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: DetailCommonCell.reuseIdentifier, for: indexPath) as? DetailCommonCell
+                
+                let convertItems = self.makeIntroInfoData(item: info)
+                cell?.configure(with: convertItems)
+                return cell
 //            case .eateryInfo(let info):
 //                return UICollectionViewCell()
             }
         }
     }
+    
+    
+    /// CommonIntroItem 타입의 데이터를 [(String, String?)] 타입으로 변환
+    private func makeCommonInfoData(item: CommonIntroItem) -> [(String, String?)] {
+        
+        return [
+            ("주소", item.addr1),
+            ("소개", item.overview)
+        ]
+    }
+    
+    
+    
+    
+    /// IntroInfoItem 타입의 데이터를 [(String, String?] 타입으로 변환
+    private func makeIntroInfoData(item: IntroInfoItem) -> [(String, String?)] {
+        
+        let firstMenu = item.firstmenu?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let treatmenu = item.treatmenu?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        
+        let totalMenu = [firstMenu, treatmenu]
+            .filter { !$0.isEmpty }
+            .joined(separator: ",")
+        
+        let finalValue = totalMenu.isEmpty ? nil : totalMenu
+        
+        return [
+            ("메뉴", finalValue),
+            ("영업시간", item.opentimefood),
+            ("휴무일", item.restdatefood),
+            ("전화번호", item.infocenterfood)
+        ]
+    }
+    
     
     
     private func createCompositionalLayout() -> UICollectionViewLayout {
@@ -168,8 +231,8 @@ extension EateryDetailViewController {
                 return self.createCommonSection()
             case .detailImage:
                 return self.createImageSection()
-//            case .eateryInfo:
-//                return self.createHeaderSection(using: self.headerData!)
+            case .eateryInfo:
+                return self.createCommonSection()
             }
         }
         
@@ -271,6 +334,25 @@ extension EateryDetailViewController {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 self?.reloadData()
+            }
+            .store(in: &cancellables)
+    }
+    
+    
+    private func bindLoading() {
+        detailLoadingViewModel = DetailLoadingViewModel(detailVM: detailViewModel)
+        
+        detailLoadingViewModel.$isLoading
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isLoading in
+                if isLoading {
+                    self?.activityIndicator.startAnimating()
+                    self?.detailCollectionView.isHidden = true
+                } else {
+                    self?.activityIndicator.stopAnimating()
+                    self?.detailCollectionView.isHidden = false
+                    self?.detailCollectionView.reloadData()
+                }
             }
             .store(in: &cancellables)
     }

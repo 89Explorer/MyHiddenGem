@@ -13,14 +13,14 @@ enum EateryFromDetailSection: Int, CaseIterable {
     case header
     case common
     case detailImage
-    //case eateryInfo
+    case eateryInfo
     
     var title: String {
         switch self {
         case .header: return "헤더뷰"
         case .common: return "공통정보"
         case .detailImage: return "상세 이미지"
-        //case .eateryInfo: return "소개"
+        case .eateryInfo: return "소개"
         }
     }
 }
@@ -31,7 +31,7 @@ enum EateryFromDetailType: Hashable {
     case header(EateryFromDetailHeader)
     case common(CommonIntroItem)
     case detailImage(DetailImageItem)
-    //case eateryInfo(IntroInfoItem)
+    case eateryInfo(IntroInfoItem)
     
     func hash(into hasher: inout Hasher) {
         switch self {
@@ -41,8 +41,8 @@ enum EateryFromDetailType: Hashable {
             hasher.combine(value.contentid)
         case .detailImage(let value):
             hasher.combine(value.originimgurl)
-//        case .eateryInfo(let value):
-//            hasher.combine(value.contentid)
+        case .eateryInfo(let value):
+            hasher.combine(value.contentid)
         }
     }
     
@@ -54,8 +54,8 @@ enum EateryFromDetailType: Hashable {
             return a.contentid == b.contentid
         case (.detailImage(let a), .detailImage(let b)):
             return a.originimgurl == b.originimgurl
-//        case (.eateryInfo(let a), .eateryInfo(let b)):
-//            return a.contentid == b.contentid
+        case (.eateryInfo(let a), .eateryInfo(let b)):
+            return a.contentid == b.contentid
         default:
             return false
         }

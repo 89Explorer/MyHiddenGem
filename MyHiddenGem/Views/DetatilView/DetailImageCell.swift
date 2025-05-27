@@ -18,8 +18,8 @@ class DetailImageCell: UICollectionViewCell {
     
     // MARK: - UI Component
     
-    private let titleLabel: UILabel = UILabel()
     private let imageView: UIImageView = UIImageView()
+    private let loadingIndicator = UIActivityIndicatorView(style: .medium)
     
     
     // MARK: - Init
@@ -62,7 +62,10 @@ class DetailImageCell: UICollectionViewCell {
         
         let posterPath = URL(string: item.originimgurl)
         
-        imageView.sd_setImage(with: posterPath, completed: nil)
+        loadingIndicator.startAnimating()
+        imageView.sd_setImage(with: posterPath, placeholderImage: nil) {_,_,_,_ in 
+            self.loadingIndicator.stopAnimating()
+        }
     }
     
 }
