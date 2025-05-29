@@ -57,6 +57,7 @@ class RecommendationCell: UICollectionViewCell {
         
         let stackView = UIStackView(arrangedSubviews: [tagLine, title, subTitle, imageView])
         stackView.translatesAutoresizingMaskIntoConstraints = false
+        stackView.spacing = 2
         stackView.axis = .vertical
         contentView.addSubview(stackView)
         
@@ -73,6 +74,7 @@ class RecommendationCell: UICollectionViewCell {
         
     }
     
+    
     /// 각 UI에 데이터를 할당하는 함수
     func configure(with eateries: EateryItem) {
         
@@ -85,6 +87,26 @@ class RecommendationCell: UICollectionViewCell {
         let posterPath = URL(string: eateries.firstimage)
         imageView.sd_setImage(with: posterPath, completed: nil)
         
+    }
+    
+    
+    /// 상세 페이지 내에 공용으로 사용할 목적으로 메서드
+    func configure(with commonInfo: CommonInfo) {
+        
+        if let categoryCode = commonInfo.cateogry {
+//            tagLine.text = CategoryCodeMapper.emojiName(for: categoryCode)
+            
+            tagLine.text = CategoryCodeMapper.name(for: categoryCode)
+        } else {
+            tagLine.text = "⚪️ 기타"
+        }
+    
+        title.text = commonInfo.title
+        subTitle.text = commonInfo.address
+        
+        guard let imageURL = commonInfo.imageURL else { return }
+        let posterPath = URL(string: imageURL)
+        imageView.sd_setImage(with: posterPath, completed: nil)
     }
     
 }

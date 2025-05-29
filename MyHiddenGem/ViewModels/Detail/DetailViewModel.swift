@@ -13,9 +13,10 @@ class DetailViewModel: ObservableObject {
     
     // MARK: - Variable
     @Published var detailIntro: [IntroInfoItem] = []
-    
     @Published var commonIntro: [CommonIntroItem] = []
     @Published var detailImageList: [DetailImageItem] = []
+    
+    @Published var detailTotalModel: [DetailSection] = []
     
     @Published var isIntroLoading: Bool = true
     @Published var isCommonLoading: Bool = true
@@ -25,6 +26,16 @@ class DetailViewModel: ObservableObject {
     @Published var errorMessage: String? = nil
     
     private var cancellable: Set<AnyCancellable> = []
+    
+    private let introItemMetas: [IntroItemMeta] = [
+        .init(keyPath: \.mainMenu, title: "대표 메뉴", systemImageNames: "fork.knife"),
+        .init(keyPath: \.subMenu, title: "취급 메뉴", systemImageNames: "list.bullet"),
+        .init(keyPath: \.inquiry, title: "문의 및 안내", systemImageNames: "phone"),
+        .init(keyPath: \.openTime, title: "영업 시간", systemImageNames: "clock"),
+        .init(keyPath: \.restDay, title: "쉬는 날", systemImageNames: "moon.zzz"),
+        .init(keyPath: \.parking, title: "주차 시설", systemImageNames: "car"),
+        .init(keyPath: \.packing, title: "포장 가능", systemImageNames: "takeoutbag.and.cup.and.straw")
+    ]
     
     
     
@@ -88,4 +99,105 @@ class DetailViewModel: ObservableObject {
         self.detailImageList = []
     }
     
+    
+    /// IntroInfoItem → DetailSection 변환하는 메서드
+//    func makeIntroSection() -> DetailSection? {
+//        guard let item = detailIntro.first else { return nil }
+//        
+//        let convertedItems = [
+//            ("대표 메뉴", item.firstmenu),
+//            ("취급 메뉴", item.treatmenu),
+//            ("문의 및 안내", item.infocenterfood),
+//            ("영업 시간", item.opentimefood),
+//            ("쉬는 날", item.restdatefood),
+//            ("주차 시설", item.parkingfood),
+//            ("포장 가능", item.packing)
+//        ].map { DetailItemType.intro(title: $0.0, value: $0.1) }
+//        
+//        return DetailSection(type: .intro, item: convertedItems)
+//    }
+    
+    
+    /// CommonIntroItem → DetailSection 변환하는 메서드
+//    func makeCommonSection() -> DetailSection? {
+//        guard let item = commonIntro.first else { return nil }
+//        
+//        let convertedItems = [
+//            ("주소", item.addr1),
+//            ("소개", item.overview),
+//            ("대표 이미지", item.firstimage),
+//            ("가게 이름", item.title),
+//            ("카테고리", item.cat3)
+//        ].map { DetailItemType.common(title: $0.0, value: $0.1) }
+//        
+//        return DetailSection(type: .common, item: convertedItems)
+//    }
+    
+    
+    /// CommonIntroItem → DetailSection 변환하는 메서드
+    func makeCommonSection() -> DetailSection? {
+        guard let item = commonIntro.first else { return nil }
+        
+        let info = CommonInfo(
+            title: item.title,
+            cateogry: item.cat3,
+            address: item.addr1,
+            imageURL: item.firstimage
+        )
+        
+        let singleItem: DetailItemType = DetailItemType.common(info: info)
+        return DetailSection(type: .common, item: [singleItem])
+    }
+    
+    
+    /// IntroInfoItem → DetailSection 변환하는 메서드
+    func makeIntroSection() -> DetailSection? {
+        guard let item = detailIntro.first else { return nil }
+        
+        let info = IntroInfo(
+            mainMenu: item.firstmenu,
+            subMenu: item.treatmenu,
+            inquiry: item.infocenterfood,
+            openTime: item.opentimefood,
+            restDay: item.restdatefood,
+            parking: item.parkingfood,
+            packing: item.packing
+        )
+        
+        let singleItem: DetailItemType = DetailItemType.intro(info: info)
+        return DetailSection(type: .intro, item: [singleItem])
+    }
+
+    
+    /// DetailImageItem → DetailSection 변환하는 메서드
+    func makeImageSection() -> DetailSection? {
+        guard !detailImageList.isEmpty else { return nil }
+        
+        let convertedItems = detailImageList.map {
+            DetailItemType.image(title: $0.imgname, value: $0.originimgurl)
+        }
+        
+        return DetailSection(type: .image, item: convertedItems)
+    }
+    
+    
+    /// 데이터 타입을 변환하는 메서드를 통합하는 메서드
+    func makeAllSections() {
+        var sections: [DetailSection] = []
+        
+        if let common = makeCommonSection() {
+            sections.append(common)
+        }
+        
+        if let intro = makeIntroSection() {
+            sections.append(intro)
+        }
+        
+        if let image = makeImageSection() {
+            sections.append(image)
+        }
+        
+        self.detailTotalModel = sections
+
+    }    
 }

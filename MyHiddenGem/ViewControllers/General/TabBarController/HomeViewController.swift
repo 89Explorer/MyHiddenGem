@@ -452,10 +452,8 @@ extension HomeViewController: UICollectionViewDelegate {
             
         case .eatery(let eatery):
             print("선택된 음식점: \(eatery.title)")
-            
-            let detailHeader: EateryFromDetailHeader = EateryFromDetailHeader(contentId: eatery.contentid, contentType: eatery.contenttypeid, eateryTitle: eatery.title, posterPath: eatery.firstimage, cat3: eatery.cat3 )
-            
-            let detailVC = EateryDetailViewController(with: detailHeader)
+    
+            let detailVC = EateryDetailViewController(contentId: eatery.contentid, contentTypeId: eatery.contenttypeid)
             navigationController?.pushViewController(detailVC, animated: true)
             
             

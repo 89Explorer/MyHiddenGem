@@ -10,78 +10,61 @@ import Combine
 
 
 class EateryDetailViewController: UIViewController {
-
+    
     
     // MARK: - Variable
+    private var contentId: String = ""
+    private var contentTypeId: String = ""
     
-    private var headerData: EateryFromDetailHeader?
     
-    private var detailViewModel: DetailViewModel = DetailViewModel()
-    private var detailLoadingViewModel: DetailLoadingViewModel!
-    
-    private var dataSource: UICollectionViewDiffableDataSource<EateryFromDetailSection, EateryFromDetailType>?
-    
+    private var detailVM: DetailViewModel = DetailViewModel()
     private var cancellables: Set<AnyCancellable> = []
-    
-    
-    /// Cell을 공용으로 사용할 목적으로 데이터 타입 변환
-    private let commonInfoData: [(String, String?)] = []
-    private let IntroInfoData: [(String, String?)] = []
     
     // MARK: - UI Component
     
     private var detailCollectionView: UICollectionView!
-    private let activityIndicator = UIActivityIndicatorView(style: .large)
+    private var dataSource: UICollectionViewDiffableDataSource<DetailSectionType, DetailItemType>?
     
- 
+    
     // MARK: - Init
     
-    init(with headerData: EateryFromDetailHeader) {
+    init(contentId: String, contentTypeId: String) {
         super.init(nibName: nil, bundle: nil)
-        self.headerData = headerData
+        self.contentId = contentId
+        self.contentTypeId = contentTypeId
     }
-    
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
     
-    // MARK: - Life Cycle 
+    
+    // MARK: - Life Cycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
-        
+        print("✅ 선택된 음식점 Id: \(contentId)")
         setupNavigationBar()
         
-        bindLoading()
-       
-        //self.navigationController?.navigationBar.isHidden = true;
-        
+        fetchDetailAllData(contentId: contentId, contentTypeId: contentTypeId)
         bindViewModel()
-        fetchEateryDetailIntroInfo(contentId: headerData!.contentId, contentType: headerData!.contentType)
+        
         setupCollectionView()
         createDataSource()
-        
     }
     
-    
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        
-        detailViewModel.clearDetailData()
-    }
 }
 
 
-// MARK: - Extension: 네비게이션 바 설정
+// MARK: - Extension: 네비게이션을 설정하는 함수
 
 extension EateryDetailViewController {
     
     /// 네비게이션바 설정하는 함수
     func setupNavigationBar() {
-        navigationItem.title = "상세페이지"
+        //navigationItem.title = regionName
         
         navigationItem.hidesBackButton = true
         let backBarButton = UIBarButtonItem(image: UIImage(systemName: "chevron.backward.circle.fill"), style: .done, target: self, action: #selector(didTappedBackButton))
@@ -96,141 +79,92 @@ extension EateryDetailViewController {
 }
 
 
-
 // MARK: - Extension: CollectionView 설정
 
 extension EateryDetailViewController {
-        
+    
+    
+    /// 컬렉션뷰를 설정하는 메서드
     private func setupCollectionView() {
-        
-        detailCollectionView = UICollectionView(frame: view.bounds, collectionViewLayout: createCompositionalLayout())
+        detailCollectionView = UICollectionView(frame: view.bounds, collectionViewLayout: createCompostionalLayout())
         detailCollectionView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        detailCollectionView.backgroundColor = .systemGray6
-        detailCollectionView.showsVerticalScrollIndicator = false
+        detailCollectionView.backgroundColor = .systemBackground
         detailCollectionView.showsHorizontalScrollIndicator = false
-        detailCollectionView.isUserInteractionEnabled = true
+        detailCollectionView.showsVerticalScrollIndicator = false
         
         view.addSubview(detailCollectionView)
-        view.addSubview(activityIndicator)
         
-        activityIndicator.center = view.center
+        detailCollectionView.register(RecommendationCell.self, forCellWithReuseIdentifier: RecommendationCell.reuseIdentifier)
+        detailCollectionView.register(DetailIntroCell.self, forCellWithReuseIdentifier: DetailIntroCell.reuseIdentifier)
         
-        detailCollectionView.register(DetailCommonCell.self, forCellWithReuseIdentifier: DetailCommonCell.reuseIdentifier)
-        detailCollectionView.register(DetailHeaderCell.self, forCellWithReuseIdentifier: DetailHeaderCell.reuseIdentifier)
-        detailCollectionView.register(DetailImageCell.self, forCellWithReuseIdentifier: DetailImageCell.reuseIdentifier)
     }
     
     
     private func reloadData() {
         
-        guard let dataSource else {
-            print("⚠️  dataSource 없음 - reloadData() 무시됨")
+        guard let commonSection = detailVM.detailTotalModel.first(where: { $0.type == .common }) else {
+            print("⚠️ .common 섹션이 없습니다.")
             return
         }
         
-        var snapshot = NSDiffableDataSourceSnapshot<EateryFromDetailSection, EateryFromDetailType>()
+        guard let introSection = detailVM.detailTotalModel.first(where: { $0.type == .intro }) else {
+            print("⚠️ .intro 섹션이 없습니다.")
+            return
+        }
         
-        snapshot.appendSections([.header, .common, .detailImage, .eateryInfo])
+        var snapshot = NSDiffableDataSourceSnapshot<DetailSectionType, DetailItemType>()
+        snapshot.appendSections([.common, .intro])
+        snapshot.appendItems(commonSection.item, toSection: .common)
+        snapshot.appendItems(introSection.item, toSection: .intro)
         
-        let headerInfo = EateryFromDetailHeader(
-            contentId: headerData!.contentId,
-            contentType: headerData!.contentType,
-            eateryTitle: headerData?.eateryTitle ?? "상세 페이지",
-            posterPath: headerData!.posterPath,
-            cat3: headerData!.cat3)
-        
-        snapshot.appendItems([.header(headerInfo)], toSection: .header)
-        snapshot.appendItems(detailViewModel.commonIntro.map { .common($0)}, toSection: .common)
-        snapshot.appendItems(detailViewModel.detailImageList.map { .detailImage($0)}, toSection: .detailImage)
-        
-        snapshot.appendItems(detailViewModel.detailIntro.map { .eateryInfo($0)}, toSection: .eateryInfo)
-        
-        dataSource.apply(snapshot, animatingDifferences: true)
+        dataSource?.apply(snapshot, animatingDifferences: true)
         
     }
     
     
     private func createDataSource() {
-        dataSource = UICollectionViewDiffableDataSource<EateryFromDetailSection, EateryFromDetailType>(collectionView: detailCollectionView) { collectionView, indexPath, item in
+        dataSource = UICollectionViewDiffableDataSource<DetailSectionType, DetailItemType>(
+            collectionView: detailCollectionView
+        ) { collectionView, indexPath, item in
+            
             switch item {
-            case .header(let header):
-                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: DetailHeaderCell.reuseIdentifier, for: indexPath) as? DetailHeaderCell
-                cell?.configure(headerData: header)
-                return cell
-            case .common(let common):
-                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: DetailCommonCell.reuseIdentifier, for: indexPath) as? DetailCommonCell
-                
-                let convertItems = self.makeCommonInfoData(item: common)
-                cell?.delegate = self
-                cell?.configure(with: convertItems)
+            case .common(let commonInfo):
+                guard let cell = collectionView.dequeueReusableCell(
+                    withReuseIdentifier: RecommendationCell.reuseIdentifier,
+                    for: indexPath
+                ) as? RecommendationCell else {
+                    return nil
+                }
+                cell.configure(with: commonInfo)
                 return cell
                 
-            case .detailImage(let detailImage):
-                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: DetailImageCell.reuseIdentifier, for: indexPath) as? DetailImageCell
-                cell?.configure(with: detailImage)
+            case .intro(info: let intro):
+                guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: DetailIntroCell.reuseIdentifier, for: indexPath) as? DetailIntroCell else { return nil }
+                cell.configure(with: intro)
                 return cell
-                
-            case .eateryInfo(let info):
-                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: DetailCommonCell.reuseIdentifier, for: indexPath) as? DetailCommonCell
-                
-                let convertItems = self.makeIntroInfoData(item: info)
-                cell?.configure(with: convertItems)
-                
-                return cell
-
+            default:
+                // 추후 이미지 셀 추가 시 여기 처리
+                return nil
+            
             }
         }
     }
+
     
     
-    /// CommonIntroItem 타입의 데이터를 [(String, String?)] 타입으로 변환
-    private func makeCommonInfoData(item: CommonIntroItem) -> [(String, String?)] {
-        
-        return [
-            ("주소", item.addr1),
-            ("소개", item.overview)
-        ]
-    }
-    
-    /// IntroInfoItem 타입의 데이터를 [(String, String?] 타입으로 변환
-    private func makeIntroInfoData(item: IntroInfoItem) -> [(String, String?)] {
-        
-        let firstMenu = item.firstmenu?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        let treatMenu = item.treatmenu?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        
-        
-        let cleanedFirstMenu = firstMenu.replacingOccurrences(of: "\\s*[/,]+\\s*", with: ", ", options: .regularExpression)
-        let cleanedTreatMenu = treatMenu
-                .replacingOccurrences(of: "\\s*[/,]+\\s*", with: ", ", options: .regularExpression)
-        
-        let totalMenu = [cleanedFirstMenu, cleanedTreatMenu]
-            .filter { !$0.isEmpty }
-            .joined(separator: ", ")
-        
-        let finalValue = totalMenu.isEmpty ? nil : totalMenu
-        
-        return [
-            ("메뉴", finalValue),
-            ("영업시간", item.opentimefood),
-            ("휴무일", item.restdatefood),
-            ("전화번호", item.infocenterfood)
-        ]
-    }
-    
-    private func createCompositionalLayout() -> UICollectionViewLayout {
+    private func createCompostionalLayout() -> UICollectionViewLayout {
         let layout = UICollectionViewCompositionalLayout {
             sectionIndex, environment in
-            let sectionIdentifier = EateryFromDetailSection.allCases[sectionIndex]
+            let sectionIdentifier = DetailSectionType.allCases[sectionIndex]
             
             switch sectionIdentifier {
-            case .header:
-                return self.createHeaderSection()
+                
             case .common:
-                return self.createCommonSection()
-            case .detailImage:
-                return self.createImageSection()
-            case .eateryInfo:
-                return self.createCommonSection()
+                return self.createFeaturedSection()
+            case .intro:
+                return self.createFeaturedSection()
+            default:
+                return nil
             }
         }
         
@@ -241,94 +175,50 @@ extension EateryDetailViewController {
     }
     
     
-//    private func createHeaderSection(using section: EateryFromDetailHeader) -> NSCollectionLayoutSection {
-//        let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalHeight(1.0))
-//        let item = NSCollectionLayoutItem(layoutSize: itemSize)
-//        
-//        let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .absolute(500))
-//        let group = NSCollectionLayoutGroup.vertical(layoutSize: groupSize, subitems: [item])
-//        
-//        let section = NSCollectionLayoutSection(group: group)
-//        section.interGroupSpacing = 8
-//        return section
-//    }
-    
-    private func createHeaderSection() -> NSCollectionLayoutSection {
-        let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalHeight(1.0))
-        let item = NSCollectionLayoutItem(layoutSize: itemSize)
+    private func createFeaturedSection() -> NSCollectionLayoutSection {
+        let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .fractionalHeight(1))
         
-        let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .absolute(500))
-        let group = NSCollectionLayoutGroup.vertical(layoutSize: groupSize, subitems: [item])
+        let layoutItem = NSCollectionLayoutItem(layoutSize: itemSize)
+        layoutItem.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 5, bottom: 0, trailing: 5)
         
-        let section = NSCollectionLayoutSection(group: group)
-        section.interGroupSpacing = 8
-        return section
+        let layoutGroupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.93), heightDimension: .estimated(300))
+        let layoutGroup = NSCollectionLayoutGroup.horizontal(layoutSize: layoutGroupSize, subitems: [layoutItem])
+        
+        let layoutSection = NSCollectionLayoutSection(group: layoutGroup)
+        layoutSection.orthogonalScrollingBehavior = .groupPagingCentered
+        
+        return layoutSection
     }
     
     
-    private func createCommonSection() -> NSCollectionLayoutSection {
-        let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(100.0))
-        let item = NSCollectionLayoutItem(layoutSize: itemSize)
-        
-        let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(100.0))
-        let group = NSCollectionLayoutGroup.vertical(layoutSize: groupSize, subitems: [item])
-        
-        let section = NSCollectionLayoutSection(group: group)
-        section.interGroupSpacing = 8
-        return section
-    }
-    
-    
-    private func createImageSection() -> NSCollectionLayoutSection {
-        let itemSize = NSCollectionLayoutSize(
-            widthDimension: .absolute(150),
-            heightDimension: .absolute(200)
-        )
-        let item = NSCollectionLayoutItem(layoutSize: itemSize)
-        //item.contentInsets = NSDirectionalEdgeInsets(top: 4, leading: 4, bottom: 4, trailing: 4)
-
-        let groupSize = NSCollectionLayoutSize(
-            widthDimension: .absolute(150),
-            heightDimension: .absolute(200)
-        )
-        let group = NSCollectionLayoutGroup.horizontal(
-            layoutSize: groupSize,
-            subitems: [item]
-        )
-
-        let section = NSCollectionLayoutSection(group: group)
-        section.orthogonalScrollingBehavior = .groupPaging
-        section.interGroupSpacing = 8
-        section.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 20, bottom: 8, trailing: 20)
-
-        return section
-    }
 }
 
 
-// MARK: - Extension: 바인딩 함수
+
+
+
+// MARK: - Extension: 바인딩 목적
 
 extension EateryDetailViewController {
     
-    private func fetchEateryDetailIntroInfo(contentId: String, contentType: String) {
+    func fetchDetailAllData(contentId: String, contentTypeId: String) {
         
         Task {
-            async let eateryInfo: () = detailViewModel.fetchDetailInfo(contentId: contentId, contentType: contentType)
-            async let detailInfo: () = detailViewModel.fetchCommonIntroInfo(contentId: contentId)
-            async let detailImage: () = detailViewModel.fetchDetailImageList(contentId: contentId)
+            async let common:() = detailVM.fetchCommonIntroInfo(contentId: contentId)
+            async let intro:() = detailVM.fetchDetailInfo(contentId: contentId, contentType: contentTypeId)
+            async let image:() = detailVM.fetchDetailImageList(contentId: contentId)
             
-            await eateryInfo
-            await detailInfo
-            await detailImage
+            await common
+            await intro
+            await image
+            
+            // 모든 데이터가 완료된 후 섹션 생성
+            detailVM.makeAllSections()
         }
     }
     
-    
     private func bindViewModel() {
-        
-        detailViewModel.$detailIntro
-            .combineLatest(detailViewModel.$detailIntro)
-            .combineLatest(detailViewModel.$detailImageList)
+        detailVM.$detailTotalModel
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 self?.reloadData()
@@ -337,39 +227,44 @@ extension EateryDetailViewController {
     }
     
     
-    private func bindLoading() {
-        detailLoadingViewModel = DetailLoadingViewModel(detailVM: detailViewModel)
-        
-        detailLoadingViewModel.$isLoading
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] isLoading in
-                if isLoading {
-                    self?.activityIndicator.startAnimating()
-                    self?.detailCollectionView.isHidden = true
-                } else {
-                    self?.activityIndicator.stopAnimating()
-                    self?.detailCollectionView.isHidden = false
-                    self?.detailCollectionView.reloadData()
-                }
-            }
-            .store(in: &cancellables)
-    }
+    
+    //    private func bindViewModel() {
+    //        detailVM.$detailTotalModel
+    //            .receive(on: DispatchQueue.main)
+    //            .sink { [weak self] sections in
+    //                print("✅ 섹션 데이터 수신 완료")
+    //
+    //                for section in sections {
+    //                    switch section.type {
+    //                    case .common:
+    //                        print("📘 [기본 정보]")
+    //                        section.item.forEach { item in
+    //                            if case let .common(title, value) = item {
+    //                                print(" - \(title): \(value ?? "없음")")
+    //                            }
+    //                        }
+    //
+    //                    case .intro:
+    //                        print("📗 [소개]")
+    //                        section.item.forEach { item in
+    //                            if case let .intro(title, value) = item {
+    //                                print(" - \(title): \(value ?? "없음")")
+    //                            }
+    //                        }
+    //
+    //                    case .image:
+    //                        print("📙 [이미지]")
+    //                        section.item.forEach { item in
+    //                            if case let .image(title, value) = item {
+    //                                print(" - \(title): \(value ?? "없음")")
+    //                            }
+    //                        }
+    //
+    //                    }
+    //                }
+    //            }
+    //            .store(in: &cancellables)
+    //    }
 }
 
 
-// MARK: - Extension: 델리게이트 패턴을 사용해 "소개" 더보기 기능
-
-extension EateryDetailViewController: DetailCommonCellDelegate {
-    
-//    func didTapIntroText(_ text: String?) {
-//        print("더보기 기능 활성화")
-//        let alert = UIAlertController(title: "소개", message: text, preferredStyle: .alert)
-//        alert.addAction(UIAlertAction(title: "확인", style: .default))
-//        present(alert, animated: true)
-//    }
-    
-    func didTapIntroText(_ text: String?) {
-        let vc = IntroSheetViewController(text: text!)
-        present(vc, animated: true)
-    }
-}
