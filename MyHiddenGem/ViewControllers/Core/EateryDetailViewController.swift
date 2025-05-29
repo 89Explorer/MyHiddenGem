@@ -96,6 +96,7 @@ extension EateryDetailViewController {
         
         detailCollectionView.register(RecommendationCell.self, forCellWithReuseIdentifier: RecommendationCell.reuseIdentifier)
         detailCollectionView.register(DetailIntroCell.self, forCellWithReuseIdentifier: DetailIntroCell.reuseIdentifier)
+        detailCollectionView.register(SectionHeader.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: SectionHeader.reuseIdentifier)
         
     }
     
@@ -133,20 +134,40 @@ extension EateryDetailViewController {
                     withReuseIdentifier: RecommendationCell.reuseIdentifier,
                     for: indexPath
                 ) as? RecommendationCell else {
-                    return nil
+                    return UICollectionViewCell()
                 }
                 cell.configure(with: commonInfo)
                 return cell
                 
-            case .intro(info: let intro):
-                guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: DetailIntroCell.reuseIdentifier, for: indexPath) as? DetailIntroCell else { return nil }
-                cell.configure(with: intro)
+            case .intro(let intro):
+                guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: DetailIntroCell.reuseIdentifier, for: indexPath) as? DetailIntroCell else { return UICollectionViewCell() }
+                cell.configure(info: intro)
                 return cell
             default:
                 // 추후 이미지 셀 추가 시 여기 처리
                 return nil
             
             }
+        }
+        
+        dataSource?.supplementaryViewProvider = { [weak self] collectionView, kind, indexPath in
+            guard kind == UICollectionView.elementKindSectionHeader else { return nil }
+            guard let sectionType = self?.dataSource?.snapshot().sectionIdentifiers[indexPath.section] else { return nil }
+            
+            guard let sectionHeader = collectionView.dequeueReusableSupplementaryView(
+                ofKind: kind,
+                withReuseIdentifier: SectionHeader.reuseIdentifier,
+                for: indexPath
+            ) as? SectionHeader else { return nil }
+            
+            switch sectionType {
+            case .intro:
+                sectionHeader.configure(main: "기본 정보", sub: "")
+                return sectionHeader
+            default:
+                return nil
+            }
+            
         }
     }
 
@@ -162,7 +183,7 @@ extension EateryDetailViewController {
             case .common:
                 return self.createFeaturedSection()
             case .intro:
-                return self.createFeaturedSection()
+                return self.createIntroSection()
             default:
                 return nil
             }
@@ -191,9 +212,36 @@ extension EateryDetailViewController {
     }
     
     
+    /// 상세페이지 내에 Intro 섹션 부분 UI 설정 메서드
+    private func createIntroSection() -> NSCollectionLayoutSection {
+        let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .estimated(300.0))
+        
+        let layoutItem = NSCollectionLayoutItem(layoutSize: itemSize)
+        //layoutItem.contentInsets = NSDirectionalEdgeInsets(top: 5, leading: 5, bottom: 5, trailing: 5)
+        
+        let layoutGroupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(300.0))
+        let layoutGroup = NSCollectionLayoutGroup.vertical(layoutSize: layoutGroupSize, subitems: [layoutItem])
+        
+        let layoutSection = NSCollectionLayoutSection(group: layoutGroup)
+        layoutSection.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 15, bottom: 10, trailing: 15)
+        
+        let layoutSectionHeader = createSectionHeader()
+        layoutSection.boundarySupplementaryItems = [layoutSectionHeader]
+        return layoutSection
+    }
+    
+    
+    
+    private func createSectionHeader() -> NSCollectionLayoutBoundarySupplementaryItem {
+        let layoutSectionHeaderSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.93), heightDimension: .estimated(80))
+        let layoutSectionHeader = NSCollectionLayoutBoundarySupplementaryItem(
+            layoutSize: layoutSectionHeaderSize,
+            elementKind: UICollectionView.elementKindSectionHeader,
+            alignment: .top)
+        return layoutSectionHeader
+    }
+    
 }
-
-
 
 
 

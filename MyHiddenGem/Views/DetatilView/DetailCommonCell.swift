@@ -101,23 +101,23 @@ class DetailCommonCell: UICollectionViewCell {
 //        overviewView.configure(title: "소개", value: overviewValue)
 //    }
     
-    func configure(with items: [(title: String, value: String?)]) {
-        mainStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
-        
-        for item in items {
-            let view = TitleValueView()
-            view.configure(title: item.title, value: item.value)
-            mainStackView.addArrangedSubview(view)
-            
-            
-            if item.title == "소개" {
-                introText = item.value
-                view.isUserInteractionEnabled = true
-                let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleIntroTap))
-                view.addGestureRecognizer(tapGesture)
-            }
-        }
-    }
+//    func configure(with items: [(title: String, value: String?)]) {
+//        mainStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
+//        
+//        for item in items {
+//            let view = TitleValueView()
+//            view.configure(title: item.title, value: item.value)
+//            mainStackView.addArrangedSubview(view)
+//            
+//            
+//            if item.title == "소개" {
+//                introText = item.value
+//                view.isUserInteractionEnabled = true
+//                let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleIntroTap))
+//                view.addGestureRecognizer(tapGesture)
+//            }
+//        }
+//    }
     
     
     ///

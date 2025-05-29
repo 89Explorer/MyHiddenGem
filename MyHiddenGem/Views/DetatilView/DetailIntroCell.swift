@@ -13,21 +13,20 @@ class DetailIntroCell: UICollectionViewCell {
     // MARK: - Variable
     
     static let reuseIdentifier: String = "DetailIntroCell"
-
+    
     
     // MARK: - UI Component
     
-    private var iconImageView: UIImageView = UIImageView()
-    private let titleLabel: UILabel = UILabel()
-    private let valueLabel: UILabel = UILabel()
-    private let arrowImage: UIImageView = UIImageView()
+    private let stackView: UIStackView = UIStackView()
     
     
     // MARK: - Init
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        contentView.backgroundColor = .systemBackground
+        contentView.backgroundColor = .systemGray6
+        contentView.layer.cornerRadius = 8
+        contentView.clipsToBounds = true
         setupUI()
         
     }
@@ -36,55 +35,62 @@ class DetailIntroCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        stackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
+    }
+    
     
     // MARK: - Function
     
-    private func setupUI(){
-        iconImageView.tintColor = .label
-        iconImageView.setContentHuggingPriority(.defaultHigh, for: .horizontal)
+    private func setupUI() {
+        contentView.backgroundColor = .systemGray6
+        contentView.layer.cornerRadius = 12
+        contentView.clipsToBounds = true
         
-        titleLabel.font = .boldSystemFont(ofSize: 14)
-        titleLabel.textColor = .label
+        stackView.axis = .vertical
+        stackView.spacing = 16
+        stackView.alignment = .fill
+        contentView.addSubview(stackView)
         
-        valueLabel.font = .systemFont(ofSize: 14)
-        valueLabel.textColor = .secondaryLabel
-        valueLabel.numberOfLines = 0
-        
-        let textStack = UIStackView(arrangedSubviews: [titleLabel, valueLabel])
-        textStack.axis = .vertical
-        textStack.spacing = 2
-        
-        arrowImage.tintColor = .tertiaryLabel
-        arrowImage.setContentHuggingPriority(.defaultHigh, for: .horizontal)
-        
-        let totalStack = UIStackView(arrangedSubviews: [iconImageView, textStack, arrowImage])
-        totalStack.axis = .horizontal
-        totalStack.spacing = 12
-        totalStack.alignment = .center
-        
-        contentView.addSubview(totalStack)
-        totalStack.translatesAutoresizingMaskIntoConstraints = false
-        
+        stackView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            
-            totalStack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            totalStack.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            totalStack.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 12),
-            totalStack.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -12)
-            
+            stackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            stackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            stackView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 16),
+            stackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -16)
         ])
-        
     }
     
-    func configure(with introInfo: IntroInfo) {
-        
-        iconImageView.image = UIImage(systemName: "info.circle")
-        titleLabel.text = "대표 메뉴"
-        valueLabel.text = introInfo.mainMenu ?? "-"
-        arrowImage.image = UIImage(systemName: "chevron.right")
-        
-    }
     
+    func configure(info: IntroInfo) {
+        
+        var packing = info.packing
+        var parking = info.parking
+        
+        if packing?.count == 0 {
+            packing = "_"
+        }
+        
+        if parking?.count == 0{
+            parking = "_"
+        }
+        
+        let items: [(icon: String, title: String, value: String?)] = [
+            ("fork.knife", "대표 메뉴", info.mainMenu),
+            ("list.bullet", "부가 메뉴", info.subMenu),
+            ("phone", "문의 및 안내", info.inquiry),
+            ("clock", "영업 시간", info.openTime),
+            ("calendar", "쉬는 날", info.restDay),
+            ("parkingsign.square", "주차 여부", parking),
+            ("backpack", "포장 여부", packing)
+        ]
+        
+        for item in items {
+            let view = TitleValueItemView(iconSystemName: item.icon, title: item.title, value: item.value)
+            stackView.addArrangedSubview(view)
+        }
+    }
 }
 
 

@@ -35,7 +35,7 @@ class BasePaddingLabel: UILabel {
 //    private let iconImageView: UIImageView = UIImageView()
 //    private let titleLabel = UILabel()
 //    private let valueLabel = UILabel()
-//    
+//
 //    init(title: String, image: String, value: String) {
 //        super.init(frame: .zero)
 //        self.layer.cornerRadius = 8
@@ -43,35 +43,35 @@ class BasePaddingLabel: UILabel {
 //        self.backgroundColor = .systemBackground
 //        setup(title: title, image: image, value: value)
 //    }
-//    
+//
 //    required init(coder: NSCoder) {
 //        fatalError("init(coder:) has not been implemented")
 //    }
-//    
+//
 //    private func setup(title: String, image: String, value: String) {
-//        
+//
 //        let configuration = UIImage.SymbolConfiguration(pointSize: 25)
 //        iconImageView.image = UIImage(systemName: image, withConfiguration: configuration)
 //        iconImageView.contentMode = .scaleAspectFill
 //        iconImageView.clipsToBounds = true
 //        iconImageView.tintColor = UIColor.label
 //        //iconImageView.setContentHuggingPriority(.defaultHigh, for: .horizontal)
-//        
+//
 //        titleLabel.font = .preferredFont(forTextStyle: .title3)
 //        titleLabel.text = title
 //        titleLabel.textColor = .systemBlue
-//        
+//
 //        valueLabel.font = .preferredFont(forTextStyle: .body)
 //        valueLabel.text = value
 //        valueLabel.numberOfLines = 0
 //        valueLabel.textColor = .label
-//        
+//
 //        let textStack = UIStackView(arrangedSubviews: [titleLabel, valueLabel])
 //        textStack.axis = .vertical
 //        textStack.spacing = 5
 //        textStack.alignment = .leading
 //        textStack.distribution = .fill
-//        
+//
 //        self.axis = .horizontal
 //        self.spacing = 10
 //        self.alignment = .center
@@ -83,63 +83,141 @@ class BasePaddingLabel: UILabel {
 
 
 /// 상세페이지 내에 각 셀에 공용으로 사용될 UI
-final class TitleValueView: UIView {
+//final class TitleValueView: UIView {
+//
+//    // MARK: - UI Component
+//    private let titleLabel: UILabel = UILabel()
+//    private let valueLabel: BasePaddingLabel = BasePaddingLabel()
+//
+//
+//    init(title: String = "", value: String = "") {
+//        super.init(frame: .zero)
+//        setupUI()
+//        configure(title: title, value: value)
+//
+//    }
+//
+//    required init?(coder: NSCoder) {
+//        fatalError("init(coder:) has not been implemented")
+//    }
+//
+//
+//    private func setupUI() {
+//        titleLabel.font = UIFont.boldSystemFont(ofSize: UIFont.preferredFont(forTextStyle: .title3).pointSize)
+//        titleLabel.numberOfLines = 0
+//        titleLabel.textColor = .label
+//
+//        valueLabel.font = UIFont.preferredFont(forTextStyle: .body)
+//        valueLabel.numberOfLines = 3
+//        valueLabel.textColor = .label
+//        valueLabel.backgroundColor = .systemBackground
+//        valueLabel.layer.cornerRadius = 10
+//        valueLabel.clipsToBounds = true
+//
+//        let stackView = UIStackView(arrangedSubviews: [titleLabel, valueLabel])
+//        stackView.axis = .vertical
+//        stackView.spacing = 8
+//        stackView.alignment = .fill
+//        //stackView.distribution = .fill
+//
+//        addSubview(stackView)
+//        stackView.translatesAutoresizingMaskIntoConstraints = false
+//
+//        NSLayoutConstraint.activate([
+//
+//            stackView.leadingAnchor.constraint(equalTo: leadingAnchor),
+//            stackView.trailingAnchor.constraint(equalTo: trailingAnchor),
+//            stackView.topAnchor.constraint(equalTo: topAnchor),
+//            stackView.bottomAnchor.constraint(equalTo: bottomAnchor)
+//
+//        ])
+//    }
+//
+//    func configure(title: String?, value: String?) {
+//
+//        guard let title = title,
+//              let value = value else { return }
+//
+//        titleLabel.text = title
+//        valueLabel.text = value
+//    }
+//
+//}
+
+
+/// 상세페이지 내에 DetailIntro섹션에 들어갈 공용 UI
+final class TitleValueItemView: UIView {
+    
     
     // MARK: - UI Component
+    
+    private let iconImageView: UIImageView = UIImageView()
     private let titleLabel: UILabel = UILabel()
-    private let valueLabel: BasePaddingLabel = BasePaddingLabel()
+    private let valueLabel: UILabel = UILabel()
+    private let arrowImageView: UIImageView = UIImageView()
     
     
-    init(title: String = "", value: String = "") {
+    // MARK: - Init
+    
+    init(iconSystemName: String, title: String, value: String?) {
         super.init(frame: .zero)
         setupUI()
-        configure(title: title, value: value)
+        configure(iconSysteName: iconSystemName, title: title, value: value)
         
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
+    
+    
+    // MARK: - Function
     
     private func setupUI() {
-        titleLabel.font = UIFont.boldSystemFont(ofSize: UIFont.preferredFont(forTextStyle: .title3).pointSize)
-        titleLabel.numberOfLines = 0
-        titleLabel.textColor = .label
+        iconImageView.tintColor = .label
+        iconImageView.setContentHuggingPriority(.defaultHigh, for: .horizontal)
         
-        valueLabel.font = UIFont.preferredFont(forTextStyle: .body)
-        valueLabel.numberOfLines = 3
+        titleLabel.font = .boldSystemFont(ofSize: 14)
+        titleLabel.textColor = .systemBlue
+        
+        valueLabel.font = .systemFont(ofSize: 12, weight: .regular)
         valueLabel.textColor = .label
-        valueLabel.backgroundColor = .systemBackground
-        valueLabel.layer.cornerRadius = 10
-        valueLabel.clipsToBounds = true
+        valueLabel.numberOfLines = 0
         
-        let stackView = UIStackView(arrangedSubviews: [titleLabel, valueLabel])
-        stackView.axis = .vertical
-        stackView.spacing = 8
-        stackView.alignment = .fill
-        //stackView.distribution = .fill
+        arrowImageView.image = UIImage(systemName: "chevron.right")
+        arrowImageView.tintColor = .label
+        arrowImageView.setContentHuggingPriority(.defaultHigh, for: .horizontal)
         
-        addSubview(stackView)
-        stackView.translatesAutoresizingMaskIntoConstraints = false
+        let textStack = UIStackView(arrangedSubviews: [titleLabel, valueLabel])
+        textStack.axis = .vertical
+        textStack.spacing = 2
+        
+        let mainStack = UIStackView(arrangedSubviews: [iconImageView, textStack, arrowImageView])
+        mainStack.axis = .horizontal
+        mainStack.spacing = 12
+        mainStack.alignment = .center
+        
+        addSubview(mainStack)
+        mainStack.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
             
-            stackView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            stackView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            stackView.topAnchor.constraint(equalTo: topAnchor),
-            stackView.bottomAnchor.constraint(equalTo: bottomAnchor)
+            mainStack.leadingAnchor.constraint(equalTo: leadingAnchor),
+            mainStack.trailingAnchor.constraint(equalTo: trailingAnchor),
+            mainStack.topAnchor.constraint(equalTo: topAnchor),
+            mainStack.bottomAnchor.constraint(equalTo: bottomAnchor),
+            
+            iconImageView.widthAnchor.constraint(equalToConstant: 20)
             
         ])
     }
     
-    func configure(title: String?, value: String?) {
-        
-        guard let title = title,
-              let value = value else { return }
-        
+    
+    func configure(iconSysteName: String, title: String, value: String?) {
+        let config = UIImage.SymbolConfiguration(pointSize: 16)
+        iconImageView.image = UIImage(systemName: iconSysteName,withConfiguration: config)
         titleLabel.text = title
-        valueLabel.text = value
+        valueLabel.text = value ?? "-"
     }
     
 }
