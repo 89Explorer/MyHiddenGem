@@ -352,7 +352,7 @@ extension HomeViewController {
         
         let alarmBarButton = UIBarButtonItem(customView: alarmButton)
         
-        navigationItem.rightBarButtonItems = [alarmBarButton, searchBarButton]
+        navigationItem.rightBarButtonItems = [searchBarButton]
     }
     
     
@@ -459,10 +459,22 @@ extension HomeViewController: UICollectionViewDelegate {
             
         case .gyeonggido(let gyeonggido):
             print("선택된 경기도 음식점: \(gyeonggido.title)")
+            
+            let detailVC = EateryDetailViewController(contentId: gyeonggido.contentid, contentTypeId: gyeonggido.contenttypeid)
+            navigationController?.pushViewController(detailVC, animated: true)
+            
         case .incheon(let incheon):
             print("선택된 인천 음식점: \(incheon.title)")
+            
+            let detailVC = EateryDetailViewController(contentId: incheon.contentid, contentTypeId: incheon.contenttypeid)
+            navigationController?.pushViewController(detailVC, animated: true)
+            
         case .seoul(let seoul):
             print("선택된 서울 음식점: \(seoul.title)")
+            
+            let detailVC = EateryDetailViewController(contentId: seoul.contentid, contentTypeId: seoul.contenttypeid)
+            navigationController?.pushViewController(detailVC, animated: true)
+            
         case .regionCode(let region):
 
             let regionVC = EateryFromRegionViewController(regionCode: region.code, regionName: region.name)

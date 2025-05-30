@@ -286,6 +286,9 @@ extension EateryFromRegionViewController: UICollectionViewDelegate {
             
         case .region(let eatery):
             print("선택되 음식점 정보: \(eatery.title)")
+            
+            let detailVC = EateryDetailViewController(contentId: eatery.contentid, contentTypeId: eatery.contenttypeid)
+            navigationController?.pushViewController(detailVC, animated: true)
         }
     }
 }

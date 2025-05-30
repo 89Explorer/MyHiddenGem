@@ -70,11 +70,27 @@ extension EateryDetailViewController {
         let backBarButton = UIBarButtonItem(image: UIImage(systemName: "chevron.backward.circle.fill"), style: .done, target: self, action: #selector(didTappedBackButton))
         backBarButton.tintColor = .label
         self.navigationItem.leftBarButtonItem = backBarButton
+        
+        let settingBarButton = UIBarButtonItem(image: UIImage(systemName: "line.3.horizontal"), style: .done, target: self, action: #selector(didTappedSettingButton))
+        settingBarButton.tintColor = .label
+        self.navigationItem.rightBarButtonItem = settingBarButton
     }
     
     /// 뒤로가기 액션 메서드
     @objc private func didTappedBackButton() {
         self.navigationController?.popViewController(animated: true)
+    }
+    
+    @objc private func didTappedSettingButton() {
+        print("설정 버튼이 눌림")
+        
+        let actionSheet = ActionSheetViewController()
+        
+//        if let sheet = actionSheet.sheetPresentationController {
+//            sheet.detents = [.medium()]
+//        }
+        
+        present(actionSheet, animated: true)
     }
 }
 
@@ -96,6 +112,8 @@ extension EateryDetailViewController {
         
         detailCollectionView.register(RecommendationCell.self, forCellWithReuseIdentifier: RecommendationCell.reuseIdentifier)
         detailCollectionView.register(DetailIntroCell.self, forCellWithReuseIdentifier: DetailIntroCell.reuseIdentifier)
+        detailCollectionView.register(DetailImageCell.self, forCellWithReuseIdentifier: DetailImageCell.reuseIdentifier)
+        
         detailCollectionView.register(SectionHeader.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: SectionHeader.reuseIdentifier)
         
     }
@@ -113,10 +131,16 @@ extension EateryDetailViewController {
             return
         }
         
+        guard let imageSection = detailVM.detailTotalModel.first(where: { $0.type == .image }) else {
+            print("⚠️ .image 섹션이 없습니다.")
+            return
+        }
+        
         var snapshot = NSDiffableDataSourceSnapshot<DetailSectionType, DetailItemType>()
-        snapshot.appendSections([.common, .intro])
+        snapshot.appendSections([.common, .intro, .image])
         snapshot.appendItems(commonSection.item, toSection: .common)
         snapshot.appendItems(introSection.item, toSection: .intro)
+        snapshot.appendItems(imageSection.item, toSection: .image)
         
         dataSource?.apply(snapshot, animatingDifferences: true)
         
@@ -143,10 +167,12 @@ extension EateryDetailViewController {
                 guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: DetailIntroCell.reuseIdentifier, for: indexPath) as? DetailIntroCell else { return UICollectionViewCell() }
                 cell.configure(info: intro)
                 return cell
-            default:
-                // 추후 이미지 셀 추가 시 여기 처리
-                return nil
-            
+                
+            case .image(let image):
+                guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: DetailImageCell.reuseIdentifier, for: indexPath) as? DetailImageCell else { return UICollectionViewCell() }
+                cell.configure(info: image)
+                return cell
+
             }
         }
         
@@ -163,6 +189,9 @@ extension EateryDetailViewController {
             switch sectionType {
             case .intro:
                 sectionHeader.configure(main: "기본 정보", sub: "")
+                return sectionHeader
+            case .image:
+                sectionHeader.configure(main: "관련 이미지", sub: "")
                 return sectionHeader
             default:
                 return nil
@@ -184,8 +213,8 @@ extension EateryDetailViewController {
                 return self.createFeaturedSection()
             case .intro:
                 return self.createIntroSection()
-            default:
-                return nil
+            case .image:
+                return self.createImageSection()
             }
         }
         
@@ -227,6 +256,26 @@ extension EateryDetailViewController {
         
         let layoutSectionHeader = createSectionHeader()
         layoutSection.boundarySupplementaryItems = [layoutSectionHeader]
+        return layoutSection
+    }
+    
+    
+    private func createImageSection() -> NSCollectionLayoutSection {
+        let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalHeight(1))
+        
+        let layoutItem = NSCollectionLayoutItem(layoutSize: itemSize)
+        layoutItem.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 5, bottom: 0, trailing: 5)
+        
+        let layoutGroupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.93), heightDimension: .estimated(300))
+        let layoutGroup = NSCollectionLayoutGroup.horizontal(layoutSize: layoutGroupSize, subitems: [layoutItem])
+        
+        let layoutSection = NSCollectionLayoutSection(group: layoutGroup)
+        layoutSection.orthogonalScrollingBehavior = .groupPagingCentered
+        layoutSection.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 15, bottom: 10, trailing: 15)
+        
+        let layoutSectionHeader = createSectionHeader()
+        layoutSection.boundarySupplementaryItems = [layoutSectionHeader]
+        
         return layoutSection
     }
     

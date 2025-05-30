@@ -233,5 +233,19 @@ extension CategoryViewController: UICollectionViewDelegate {
             fetchEateryFromCategory()
         }
     }
+    
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        
+        guard let selectedItem = dataSource?.itemIdentifier(for: indexPath) else { return }
+        
+        switch selectedItem {
+            
+        case .category(let item):
+            let detailVC = EateryDetailViewController(contentId: item.contentid, contentTypeId: item.contenttypeid)
+            navigationController?.pushViewController(detailVC, animated: true)
+            
+        }
+    }
 
 }

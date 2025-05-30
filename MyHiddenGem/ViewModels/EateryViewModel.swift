@@ -26,8 +26,10 @@ final class EateryViewModel: ObservableObject {
         errorMessage = nil
         isLoading = true
         
+        let convertedPageNo = String(Int.random(in: 1...200))
+        
         // ✅ async let → 병렬 실행
-        async let nationwideTask: [EateryItem] = NetworkManager.shared.getEateryLists()
+        async let nationwideTask: [EateryItem] = NetworkManager.shared.getEateryLists(pageNo: convertedPageNo)
         async let gyeonggiTask: [EateryItem] = NetworkManager.shared.getEateryLists(areaCode: 31)
         async let seoulTask: [EateryItem] = NetworkManager.shared.getEateryLists(areaCode: 1)
         async let incheonTask: [EateryItem] = NetworkManager.shared.getEateryLists(areaCode: 2)

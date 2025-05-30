@@ -192,7 +192,7 @@ final class TitleValueItemView: UIView {
         textStack.axis = .vertical
         textStack.spacing = 2
         
-        let mainStack = UIStackView(arrangedSubviews: [iconImageView, textStack, arrowImageView])
+        let mainStack = UIStackView(arrangedSubviews: [iconImageView, textStack])
         mainStack.axis = .horizontal
         mainStack.spacing = 12
         mainStack.alignment = .center
@@ -221,3 +221,14 @@ final class TitleValueItemView: UIView {
     }
     
 }
+
+
+private let introItemMetas: [IntroItemMeta] = [
+    .init(keyPath: \.mainMenu, title: "대표 메뉴", systemImageNames: "fork.knife"),
+    .init(keyPath: \.subMenu, title: "취급 메뉴", systemImageNames: "list.bullet"),
+    .init(keyPath: \.inquiry, title: "문의 및 안내", systemImageNames: "phone"),
+    .init(keyPath: \.openTime, title: "영업 시간", systemImageNames: "clock"),
+    .init(keyPath: \.restDay, title: "쉬는 날", systemImageNames: "moon.zzz"),
+    .init(keyPath: \.parking, title: "주차 시설", systemImageNames: "car"),
+    .init(keyPath: \.packing, title: "포장 가능", systemImageNames: "takeoutbag.and.cup.and.straw")
+]

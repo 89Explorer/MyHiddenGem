@@ -44,7 +44,7 @@ class DetailIntroCell: UICollectionViewCell {
     // MARK: - Function
     
     private func setupUI() {
-        contentView.backgroundColor = .systemGray6
+        contentView.backgroundColor = .systemBackground
         contentView.layer.cornerRadius = 12
         contentView.clipsToBounds = true
         

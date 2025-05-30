@@ -68,4 +68,10 @@ class DetailImageCell: UICollectionViewCell {
         }
     }
     
+    
+    func configure(info: ImageListInfo) {
+        let posterPath = URL(string: info.originalURL)
+        imageView.sd_setImage(with: posterPath, completed: nil)
+    }
+    
 }

@@ -32,7 +32,7 @@ enum DetailItemType: Hashable {
      */
     case common(info: CommonInfo)
     case intro(info: IntroInfo)
-    case image(title: String, value: String?)
+    case image(info: ImageListInfo)
 }
 
 
@@ -61,6 +61,12 @@ struct IntroInfo: Hashable {
     let restDay: String?
     let parking: String?
     let packing: String?
+}
+
+/// API를 통해 받아온 이미지 리스트 정보에서 필요로한 데이터만 모은 모델 
+struct ImageListInfo: Hashable {
+    let originalURL: String
+    let imgName: String
 }
 
 

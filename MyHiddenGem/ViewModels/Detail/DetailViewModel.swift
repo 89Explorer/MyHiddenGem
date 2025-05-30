@@ -27,18 +27,7 @@ class DetailViewModel: ObservableObject {
     
     private var cancellable: Set<AnyCancellable> = []
     
-    private let introItemMetas: [IntroItemMeta] = [
-        .init(keyPath: \.mainMenu, title: "대표 메뉴", systemImageNames: "fork.knife"),
-        .init(keyPath: \.subMenu, title: "취급 메뉴", systemImageNames: "list.bullet"),
-        .init(keyPath: \.inquiry, title: "문의 및 안내", systemImageNames: "phone"),
-        .init(keyPath: \.openTime, title: "영업 시간", systemImageNames: "clock"),
-        .init(keyPath: \.restDay, title: "쉬는 날", systemImageNames: "moon.zzz"),
-        .init(keyPath: \.parking, title: "주차 시설", systemImageNames: "car"),
-        .init(keyPath: \.packing, title: "포장 가능", systemImageNames: "takeoutbag.and.cup.and.straw")
-    ]
-    
-    
-    
+   
     // MARK: - Function
     func fetchDetailInfo(contentId: String, contentType: String) async {
         isIntroLoading = true
@@ -169,12 +158,14 @@ class DetailViewModel: ObservableObject {
     }
 
     
+    
     /// DetailImageItem → DetailSection 변환하는 메서드
     func makeImageSection() -> DetailSection? {
         guard !detailImageList.isEmpty else { return nil }
         
-        let convertedItems = detailImageList.map {
-            DetailItemType.image(title: $0.imgname, value: $0.originimgurl)
+        let convertedItems = detailImageList.map { item in
+            let info = ImageListInfo(originalURL: item.originimgurl, imgName: item.imgname)
+            return DetailItemType.image(info: info)
         }
         
         return DetailSection(type: .image, item: convertedItems)
