@@ -131,7 +131,8 @@ class DetailViewModel: ObservableObject {
             title: item.title,
             cateogry: item.cat3,
             address: item.addr1,
-            imageURL: item.firstimage
+            imageURL: item.firstimage,
+            overview: item.overview
         )
         
         let singleItem: DetailItemType = DetailItemType.common(info: info)

@@ -113,6 +113,7 @@ extension EateryDetailViewController {
         detailCollectionView.register(RecommendationCell.self, forCellWithReuseIdentifier: RecommendationCell.reuseIdentifier)
         detailCollectionView.register(DetailIntroCell.self, forCellWithReuseIdentifier: DetailIntroCell.reuseIdentifier)
         detailCollectionView.register(DetailImageCell.self, forCellWithReuseIdentifier: DetailImageCell.reuseIdentifier)
+        detailCollectionView.register(DetailOverviewCell.self, forCellWithReuseIdentifier: DetailOverviewCell.reuseIdentifier)
         
         detailCollectionView.register(SectionHeader.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: SectionHeader.reuseIdentifier)
         
@@ -141,7 +142,7 @@ extension EateryDetailViewController {
         snapshot.appendItems(commonSection.item, toSection: .common)
         snapshot.appendItems(introSection.item, toSection: .intro)
         snapshot.appendItems(imageSection.item, toSection: .image)
-        
+      
         dataSource?.apply(snapshot, animatingDifferences: true)
         
     }
@@ -160,7 +161,12 @@ extension EateryDetailViewController {
                 ) as? RecommendationCell else {
                     return UICollectionViewCell()
                 }
-                cell.configure(with: commonInfo)
+                cell.configure(with: commonInfo, isExpanded: false)
+                
+                cell.onExpandToggle = { [weak self] in
+                    self?.detailCollectionView.performBatchUpdates(nil)
+                }
+                
                 return cell
                 
             case .intro(let intro):
@@ -172,7 +178,7 @@ extension EateryDetailViewController {
                 guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: DetailImageCell.reuseIdentifier, for: indexPath) as? DetailImageCell else { return UICollectionViewCell() }
                 cell.configure(info: image)
                 return cell
-
+                
             }
         }
         
@@ -187,12 +193,14 @@ extension EateryDetailViewController {
             ) as? SectionHeader else { return nil }
             
             switch sectionType {
+                
             case .intro:
                 sectionHeader.configure(main: "기본 정보", sub: "")
                 return sectionHeader
             case .image:
                 sectionHeader.configure(main: "관련 이미지", sub: "")
                 return sectionHeader
+                
             default:
                 return nil
             }
@@ -200,8 +208,7 @@ extension EateryDetailViewController {
         }
     }
 
-    
-    
+
     private func createCompostionalLayout() -> UICollectionViewLayout {
         let layout = UICollectionViewCompositionalLayout {
             sectionIndex, environment in
@@ -226,29 +233,43 @@ extension EateryDetailViewController {
     
     
     private func createFeaturedSection() -> NSCollectionLayoutSection {
-        let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .fractionalHeight(1))
-        
+        // 셀(Item)은 내용에 따라 높이가 늘어날 수 있어야 함
+        let itemSize = NSCollectionLayoutSize(
+            widthDimension: .fractionalWidth(1.0),
+            heightDimension: .estimated(500.0)  // 충분한 예상 높이로 설정
+        )
+
         let layoutItem = NSCollectionLayoutItem(layoutSize: itemSize)
         layoutItem.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 5, bottom: 0, trailing: 5)
-        
-        let layoutGroupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.93), heightDimension: .estimated(300))
-        let layoutGroup = NSCollectionLayoutGroup.horizontal(layoutSize: layoutGroupSize, subitems: [layoutItem])
-        
+
+        // 그룹도 estimated (중요!)
+        let layoutGroupSize = NSCollectionLayoutSize(
+            widthDimension: .fractionalWidth(0.93),
+            heightDimension: .estimated(600.0)
+        )
+
+        // ❗ 수직 그룹이어야 셀의 높이 추정이 가능함
+        let layoutGroup = NSCollectionLayoutGroup.vertical(
+            layoutSize: layoutGroupSize,
+            subitems: [layoutItem]
+        )
+
         let layoutSection = NSCollectionLayoutSection(group: layoutGroup)
         layoutSection.orthogonalScrollingBehavior = .groupPagingCentered
-        
+
         return layoutSection
     }
+
     
     
     /// 상세페이지 내에 Intro 섹션 부분 UI 설정 메서드
     private func createIntroSection() -> NSCollectionLayoutSection {
-        let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .estimated(300.0))
+        let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .estimated(400))
         
         let layoutItem = NSCollectionLayoutItem(layoutSize: itemSize)
         //layoutItem.contentInsets = NSDirectionalEdgeInsets(top: 5, leading: 5, bottom: 5, trailing: 5)
         
-        let layoutGroupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(300.0))
+        let layoutGroupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(400))
         let layoutGroup = NSCollectionLayoutGroup.vertical(layoutSize: layoutGroupSize, subitems: [layoutItem])
         
         let layoutSection = NSCollectionLayoutSection(group: layoutGroup)

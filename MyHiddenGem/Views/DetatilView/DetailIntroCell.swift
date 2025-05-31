@@ -45,8 +45,8 @@ class DetailIntroCell: UICollectionViewCell {
     
     private func setupUI() {
         contentView.backgroundColor = .systemBackground
-        contentView.layer.cornerRadius = 12
-        contentView.clipsToBounds = true
+//        contentView.layer.cornerRadius = 12
+//        contentView.clipsToBounds = true
         
         stackView.axis = .vertical
         stackView.spacing = 16
@@ -84,6 +84,19 @@ class DetailIntroCell: UICollectionViewCell {
             ("calendar", "쉬는 날", info.restDay),
             ("parkingsign.square", "주차 여부", parking),
             ("backpack", "포장 여부", packing)
+        ]
+        
+        for item in items {
+            let view = TitleValueItemView(iconSystemName: item.icon, title: item.title, value: item.value)
+            stackView.addArrangedSubview(view)
+        }
+    }
+    
+    func configure(overview: CommonInfo) {
+        
+       
+        let items: [(icon: String, title: String, value: String?)] = [
+            ("info.square", "가게 소개", overview.overview),
         ]
         
         for item in items {

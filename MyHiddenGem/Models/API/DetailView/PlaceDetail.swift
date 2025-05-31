@@ -16,7 +16,7 @@ enum DetailSectionType: Int, CaseIterable {
     var title: String {
         switch self {
         case .common: return "기본 정보"
-        case .intro: return "소개"
+        case .intro: return "가게 정보"
         case .image: return "이미지"
         }
     }
@@ -49,6 +49,7 @@ struct CommonInfo: Hashable {
     let cateogry: String?
     let address: String?
     let imageURL: String?
+    let overview: String?
 }
 
 
