@@ -114,6 +114,7 @@ extension EateryDetailViewController {
         detailCollectionView.register(DetailIntroCell.self, forCellWithReuseIdentifier: DetailIntroCell.reuseIdentifier)
         detailCollectionView.register(DetailImageCell.self, forCellWithReuseIdentifier: DetailImageCell.reuseIdentifier)
         detailCollectionView.register(DetailOverviewCell.self, forCellWithReuseIdentifier: DetailOverviewCell.reuseIdentifier)
+        detailCollectionView.register(DetailMapInfoCell.self, forCellWithReuseIdentifier: DetailMapInfoCell.reuseIdentifier)
         
         detailCollectionView.register(SectionHeader.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: SectionHeader.reuseIdentifier)
         
@@ -137,11 +138,17 @@ extension EateryDetailViewController {
             return
         }
         
+        guard let mapSection = detailVM.detailTotalModel.first(where: { $0.type == .map }) else {
+            print("⚠️ .map 섹션이 없습니다.")
+            return
+        }
+        
         var snapshot = NSDiffableDataSourceSnapshot<DetailSectionType, DetailItemType>()
-        snapshot.appendSections([.common, .intro, .image])
+        snapshot.appendSections([.common, .intro, .image, .map])
         snapshot.appendItems(commonSection.item, toSection: .common)
         snapshot.appendItems(introSection.item, toSection: .intro)
         snapshot.appendItems(imageSection.item, toSection: .image)
+        snapshot.appendItems(mapSection.item, toSection: .map)
       
         dataSource?.apply(snapshot, animatingDifferences: true)
         
@@ -179,6 +186,13 @@ extension EateryDetailViewController {
                 cell.configure(info: image)
                 return cell
                 
+            case .map(let map):
+                guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: DetailMapInfoCell.reuseIdentifier, for: indexPath) as? DetailMapInfoCell else { return UICollectionViewCell() }
+                cell.configure(with: map)
+                return cell
+                
+            default:
+                return nil
             }
         }
         
@@ -199,6 +213,9 @@ extension EateryDetailViewController {
                 return sectionHeader
             case .image:
                 sectionHeader.configure(main: "관련 이미지", sub: "")
+                return sectionHeader
+            case .map:
+                sectionHeader.configure(main: "가게 위치", sub: "")
                 return sectionHeader
                 
             default:
@@ -222,6 +239,12 @@ extension EateryDetailViewController {
                 return self.createIntroSection()
             case .image:
                 return self.createImageSection()
+            case .map:
+                return self.createImageSection()
+                
+//            default:
+//                return nil
+                
             }
         }
         
@@ -245,7 +268,7 @@ extension EateryDetailViewController {
         // 그룹도 estimated (중요!)
         let layoutGroupSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(0.93),
-            heightDimension: .estimated(600.0)
+            heightDimension: .estimated(500.0)
         )
 
         // ❗ 수직 그룹이어야 셀의 높이 추정이 가능함
@@ -338,7 +361,8 @@ extension EateryDetailViewController {
     private func bindViewModel() {
         detailVM.$detailTotalModel
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
+            .sink { [weak self] items in
+            
                 self?.reloadData()
             }
             .store(in: &cancellables)

@@ -165,11 +165,26 @@ class DetailViewModel: ObservableObject {
         guard !detailImageList.isEmpty else { return nil }
         
         let convertedItems = detailImageList.map { item in
-            let info = ImageListInfo(originalURL: item.originimgurl, imgName: item.imgname)
+            let info = ImageListInfo(originalURL: item.originimgurl, imgName: item.imgname, serialnum: item.serialnum)
             return DetailItemType.image(info: info)
         }
         
         return DetailSection(type: .image, item: convertedItems)
+    }
+    
+    
+    func makeMapSection() -> DetailSection? {
+        guard let item = commonIntro.first else { return nil }
+        
+        let info = Mapinfo(
+            mapX: item.mapx,
+            mapY: item.mapy,
+            address: item.addr1
+        )
+        
+        let singleItem: DetailItemType = DetailItemType.map(info: info)
+        return DetailSection(type: .map, item: [singleItem])
+        
     }
     
     
@@ -187,6 +202,10 @@ class DetailViewModel: ObservableObject {
         
         if let image = makeImageSection() {
             sections.append(image)
+        }
+        
+        if let map = makeMapSection() {
+            sections.append(map)
         }
         
         self.detailTotalModel = sections

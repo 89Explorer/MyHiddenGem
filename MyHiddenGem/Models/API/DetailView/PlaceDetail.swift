@@ -13,11 +13,14 @@ enum DetailSectionType: Int, CaseIterable {
     case intro
     case image
     
+    case map
+    
     var title: String {
         switch self {
         case .common: return "기본 정보"
         case .intro: return "가게 정보"
         case .image: return "이미지"
+        case .map: return "지도"
         }
     }
 }
@@ -33,6 +36,7 @@ enum DetailItemType: Hashable {
     case common(info: CommonInfo)
     case intro(info: IntroInfo)
     case image(info: ImageListInfo)
+    case map(info: Mapinfo)
 }
 
 
@@ -68,8 +72,24 @@ struct IntroInfo: Hashable {
 struct ImageListInfo: Hashable {
     let originalURL: String
     let imgName: String
+    let serialnum: String
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(originalURL) // 또는 고유한 ID
+    }
+
+    static func == (lhs: ImageListInfo, rhs: ImageListInfo) -> Bool {
+        return lhs.serialnum == rhs.serialnum // 또는 고유한 기준
+    }
 }
 
+
+/// API를 통해 받아온 데이터 중에서 지도 데이터만 받아오기
+struct Mapinfo: Hashable {
+    let mapX: String
+    let mapY: String
+    let address: String
+}
 
 
 // MARK: - Struct: IntroItemMeta
@@ -80,6 +100,8 @@ struct IntroItemMeta: Hashable {
     let title: String
     let systemImageNames: String
 }
+
+
 
 
 
