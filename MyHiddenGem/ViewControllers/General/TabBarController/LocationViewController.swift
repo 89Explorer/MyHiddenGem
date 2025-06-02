@@ -10,6 +10,28 @@ import MapKit
 
 class LocationViewController: UIViewController {
     
+    // MARK: - Variable
+    private var mapX: Double = 37.5665
+    private var mapY: Double = 126.9780
+    
+    var isModal: Bool {
+        if let navigationController = navigationController {
+            if navigationController.viewControllers.first != self {
+                return false
+            }
+        }
+        if presentingViewController != nil {
+            return true
+        }
+        if navigationController?.presentingViewController?.presentedViewController == navigationController {
+            return true
+        }
+        if tabBarController?.presentingViewController is UITabBarController {
+            return true
+        }
+        return false
+    }
+    
     
     // MARK: - UI Component
     private var mapView = MKMapView()
@@ -23,6 +45,29 @@ class LocationViewController: UIViewController {
         view.backgroundColor = .systemBackground
         setupMapView()
         centerMapOnInitialLocation()
+        
+        
+        if isModal {
+            navigationItem.leftBarButtonItem = UIBarButtonItem(
+                barButtonSystemItem: .close,
+                target: self,
+                action: #selector(didTapClose)
+            )
+        }
+    }
+    
+    
+    
+    // MARK: - Init
+    
+    init(mapX: Double, mapY: Double) {
+        self.mapX = mapX
+        self.mapY = mapY
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
     
     
@@ -52,4 +97,15 @@ class LocationViewController: UIViewController {
                                         longitudinalMeters: 1000)
         mapView.setRegion(region, animated: true)
     }
+    
+    
+    // MARK: Action Method
+    
+    @objc private func didTapClose() {
+        dismiss(animated: true, completion: nil)
+    }
+    
 }
+
+
+

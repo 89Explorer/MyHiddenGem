@@ -189,6 +189,7 @@ extension EateryDetailViewController {
             case .map(let map):
                 guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: DetailMapInfoCell.reuseIdentifier, for: indexPath) as? DetailMapInfoCell else { return UICollectionViewCell() }
                 cell.configure(with: map)
+                cell.delegate = self
                 return cell
                 
             default:
@@ -410,3 +411,14 @@ extension EateryDetailViewController {
 }
 
 
+// MARK: - EateryDetailViewController: DetailMapInfoCellDelegate 설정
+
+extension EateryDetailViewController: DetailMapInfoCellDelegate {
+    func didTappedExpandButton(mapX: Double, mapY: Double) {
+        let locationVC = LocationViewController(mapX: mapX, mapY: mapY)
+        let nav = UINavigationController(rootViewController: locationVC)
+        nav.modalPresentationStyle = .formSheet
+        present(nav, animated: true)
+
+    }
+}

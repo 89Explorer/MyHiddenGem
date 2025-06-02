@@ -25,7 +25,7 @@ extension MaintTabBarController {
     
     private func setupTabBar() {
         let homeVC = UINavigationController(rootViewController: HomeViewController())
-        let locationVC = UINavigationController(rootViewController: LocationViewController())
+        let locationVC = UINavigationController(rootViewController: LocationViewController(mapX: 37.5665, mapY: 126.9780))
         let addFeedVC = UINavigationController(rootViewController: AddFeedViewController())
         let noteVC = UINavigationController(rootViewController: NoteViewController())
         
