@@ -30,6 +30,8 @@ class BottomMapView: UIView {
         setupGesture()
         
         setupSearchBar()
+        searchBar.delegate = self
+        
     }
     
     required init?(coder: NSCoder) {
@@ -134,7 +136,7 @@ extension BottomMapView {
 
 // MARK: - Extension: SearchBar 설정 하는 메서드
 
-extension BottomMapView {
+extension BottomMapView: UISearchBarDelegate {
     
     private func setupSearchBar() {
         searchBar.placeholder = "검색어를 입력해주세요 😀"
@@ -194,5 +196,11 @@ extension BottomMapView {
             searchBar.heightAnchor.constraint(equalToConstant: 44)
             
         ])
+    }
+    
+    
+    /// 검색어를 입력하면 텍스트 반영 (실시간)
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        print("입력된 검색어: \(searchText)")
     }
 }

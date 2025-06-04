@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>앱이 사용 중일 때 위치 정보를 사용합니다.</string>
+	<string>지도에서 현재 위치를 표시하기 위해 위치 권한이 필요합니다.</string>
 	<key>API_Key</key>
 	<string>$(API_Key)</string>
 	<key>CFBundleDocumentTypes</key>

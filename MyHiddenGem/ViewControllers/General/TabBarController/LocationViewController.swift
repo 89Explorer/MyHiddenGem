@@ -7,6 +7,7 @@
 
 import UIKit
 import MapKit
+import CoreLocation
 
 class LocationViewController: UIViewController {
     
@@ -14,6 +15,8 @@ class LocationViewController: UIViewController {
     private var mapX: Double = 37.5665
     private var mapY: Double = 126.9780
     
+    let status = CLLocationManager().authorizationStatus
+    let locationManager = CLLocationManager()
     
     
     var isModal: Bool {
@@ -48,7 +51,6 @@ class LocationViewController: UIViewController {
         setupMapView()
         centerMapOnInitialLocation()
         
-        
         if isModal {
             navigationItem.leftBarButtonItem = UIBarButtonItem(
                 barButtonSystemItem: .close,
@@ -59,7 +61,16 @@ class LocationViewController: UIViewController {
             bottomSheet.attach(to: self.view)
         }
         
+        requestLocationAccess()
+        setupLocationButton()
     }
+    
+    func requestLocationAccess() {
+        locationManager.delegate = self
+        locationManager.requestWhenInUseAuthorization()
+        // ⛔️ startUpdatingLocation()은 여기서 호출하지 않음!
+    }
+
     
     
     
@@ -81,6 +92,9 @@ class LocationViewController: UIViewController {
     private func setupMapView() {
         mapView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(mapView)
+        
+        mapView.showsUserLocation = true    // 현재 내위치 표시
+        mapView.userTrackingMode = .none    // 사용자 위치를 수동으로 추적
         
         NSLayoutConstraint.activate([
             
@@ -112,4 +126,71 @@ class LocationViewController: UIViewController {
     
 }
 
+
+// MARK: - Extension: 위치 권한 설정
+
+extension LocationViewController: CLLocationManagerDelegate {
+    
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        switch manager.authorizationStatus {
+        case .authorizedWhenInUse, .authorizedAlways:
+            locationManager.startUpdatingLocation()
+        case .denied, .restricted:
+            print("위치 권한 거부됨")
+        case .notDetermined:
+            print("아직 권한 요청 전")
+        @unknown default:
+            break
+        }
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        if let location = locations.first {
+            let latitude = location.coordinate.latitude
+            let longitude = location.coordinate.longitude
+            print("현재 위치: \(latitude), \(longitude)")
+            
+            // 필요하다면 지도 위치도 이동 가능
+            let coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+            let region = MKCoordinateRegion(center: coordinate, latitudinalMeters: 1000, longitudinalMeters: 1000)
+            mapView.setRegion(region, animated: true)
+            
+            // 한 번만 받아오고 멈추려면
+            locationManager.stopUpdatingLocation()
+        }
+    }
+    
+    private func setupLocationButton() {
+        let button = UIButton(type: .system)
+        button.setImage(UIImage(systemName: "location.circle"), for: .normal)
+        button.tintColor = .systemBlue
+        button.backgroundColor = .systemBackground
+        button.layer.cornerRadius = 20
+        button.clipsToBounds = true
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.addTarget(self, action: #selector(didTapLocationButton), for: .touchUpInside)
+        
+        view.addSubview(button)
+        
+        NSLayoutConstraint.activate([
+            button.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            button.bottomAnchor.constraint(equalTo: bottomSheet.topAnchor, constant: -20),
+            button.widthAnchor.constraint(equalToConstant: 40),
+            button.heightAnchor.constraint(equalToConstant: 40)
+        ])
+        
+    }
+    
+    @objc private func didTapLocationButton() {
+        guard let location = locationManager.location else {
+            print("현재 위치 정보를 가져올 수 없습니다.")
+            return
+        }
+
+        let coordinate = location.coordinate
+        let region = MKCoordinateRegion(center: coordinate, latitudinalMeters: 1000, longitudinalMeters: 1000)
+        mapView.setRegion(region, animated: true)
+    }
+
+}
 
