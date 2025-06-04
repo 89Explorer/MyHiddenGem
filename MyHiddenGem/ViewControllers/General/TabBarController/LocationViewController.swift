@@ -14,6 +14,8 @@ class LocationViewController: UIViewController {
     private var mapX: Double = 37.5665
     private var mapY: Double = 126.9780
     
+    
+    
     var isModal: Bool {
         if let navigationController = navigationController {
             if navigationController.viewControllers.first != self {
@@ -35,7 +37,7 @@ class LocationViewController: UIViewController {
     
     // MARK: - UI Component
     private var mapView = MKMapView()
-    
+    private let bottomSheet = BottomMapView()
     
     // MARK: - Life Cycle
     
@@ -53,7 +55,10 @@ class LocationViewController: UIViewController {
                 target: self,
                 action: #selector(didTapClose)
             )
+        } else {
+            bottomSheet.attach(to: self.view)
         }
+        
     }
     
     
@@ -106,6 +111,5 @@ class LocationViewController: UIViewController {
     }
     
 }
-
 
 
